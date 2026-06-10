@@ -159,6 +159,10 @@
     bar.innerHTML = html;
     bar.className = 'instruction-bar' + (tone ? ' tone-' + tone : '');
   }
+  function stepDone(n) {
+    var sec = document.getElementById('step-' + n);
+    return !!(sec && sec.dataset.done);
+  }
 
   function frameOf(n) { return document.querySelector('#viz-' + n).closest('.viz-frame'); }
 
@@ -431,6 +435,15 @@
       'reset': function () { svg.transition().duration(450).call(zoom.transform, d3.zoomIdentity); }
     };
 
+    // evidence highlight when the step-1 check is submitted
+    ctx.evidenceFx = function () {
+      band.transition().duration(450).attr('stroke-opacity', 0.5).attr('stroke-width', 26)
+        .transition().duration(1000).attr('stroke-opacity', 0.20).attr('stroke-width', 18);
+      pulseAt(ctx, [KOBE.lon, KOBE.lat], '#fff', 3);
+      dots.transition().duration(350).attr('r', function (d) { return rOf(d) + 4; })
+        .transition().duration(700).attr('r', function (d) { return rOf(d) + 1; });
+    };
+
     // --- chips ---
     var crossG = null;
     chipActions[1] = {
@@ -599,11 +612,18 @@
         })
         .on('end', function () {
           showDots();
-          setInst(2, 'One dot became ' + QUAKES.length + '. Drag the globe — the dots follow the planet, not the screen.', 'info');
+          if (!stepDone(2)) setInst(2, 'One dot became ' + QUAKES.length + '. Drag the globe — the dots follow the planet, not the screen.', 'info');
         });
     }
 
     var ctx = { n: n, entryAnimation: entryAnimation, projection: projection, redraw: redraw };
+    ctx.evidenceFx = function () {
+      showDots();
+      dotsG.selectAll('path.gdot').transition().duration(600)
+        .attr('fill-opacity', function (p) { return p.d.id === 0 ? 0.95 : 0.04; })
+        .transition().delay(500).duration(1100)
+        .attr('fill-opacity', 0.8);
+    };
     ctxs[2] = ctx;
 
     utilActions[2] = {
@@ -690,8 +710,13 @@
         .duration(450).ease(d3.easeBackOut)
         .attr('r', rOf);
       setTimeout(function () {
-        setInst(3, QUAKES.length + ' real earthquakes (USGS, 2000–2025) — and almost all of them crowd the same edges.', 'info');
+        if (!stepDone(3)) setInst(3, QUAKES.length + ' real earthquakes (USGS, 2000–2025) — and almost all of them crowd the same edges.', 'info');
       }, 3200);
+    };
+
+    ctx.evidenceFx = function () {
+      var p = drawRingPath(ctx, { animate: true, width: 4, duration: 1800 });
+      setTimeout(function () { p.transition().duration(900).attr('stroke-opacity', 0).remove(); }, 4500);
     };
 
     var ringP = null, hazardG = null, randomMode = false;
@@ -780,6 +805,13 @@
       '<span class="proto-tag">real USGS catalog record</span>';
     frame.appendChild(card);
 
+    ctx.evidenceFx = function () {
+      pulseAt(ctx, [KOBE.lon, KOBE.lat], '#fff', 3);
+      card.style.transition = 'box-shadow 0.3s';
+      card.style.boxShadow = '0 0 0 3px #1B5FAA';
+      setTimeout(function () { card.style.boxShadow = ''; }, 2200);
+    };
+
     var depthMode = false;
     chipActions[4] = {
       coordinates: function (btn) {
@@ -841,6 +873,11 @@
     var ctx = makeFlatMap(5);
     ctxs[5] = ctx;
     var dots = drawQuakeDots(ctx, QUAKES);
+
+    ctx.evidenceFx = function () {
+      dots.transition().duration(450).attr('r', function (d) { return rOf(d) * 1.9; })
+        .transition().duration(800).attr('r', rOf);
+    };
 
     var ringP = null, hazardG = null;
     chipActions[5] = {
@@ -934,7 +971,7 @@
       threshold = +slider.value;
       readout.textContent = 'M' + threshold.toFixed(1);
       var c = update();
-      window.__step6SliderMax = Math.max(window.__step6SliderMax || 6, threshold);
+      ctx.sliderMax = Math.max(ctx.sliderMax || 6, threshold);
       if (threshold >= 7.5) setInst(6, 'Only ' + c + ' quakes are this strong — and look where they are. Not one of them strays far from the path.', 'info');
       else if (threshold >= 7.0) setInst(6, c + ' quakes at M' + threshold.toFixed(1) + '+. The weaker noise is gone; the band is unmistakable.', 'info');
       else setInst(6, 'Slide the magnitude filter. Watch which dots survive — and where they live.');
@@ -952,7 +989,15 @@
       if (chipBtn) chipBtn.classList.toggle('active', on);
     }
 
-    utilActions[6].layer = function () { setRing(!ringP); window.__step6RingSeen = true; };
+    utilActions[6].layer = function () { setRing(!ringP); };
+
+    ctx.sliderMax = 6.0;
+    ctx.evidenceFx = function () {
+      setRing(true);
+      dots.filter(function (d) { return d.mag >= threshold; })
+        .transition().duration(450).attr('r', function (d) { return rOf(d) + 5; })
+        .transition().duration(900).attr('r', function (d) { return rOf(d) + 0.6; });
+    };
 
     chipActions[6] = {
       bins: function (btn) {
@@ -1054,6 +1099,10 @@
           .attr('y', function (b) { return y(b.length); })
           .attr('height', function (b) { return ih - y(b.length); });
       }
+    };
+    ctx.evidenceFx = function () {
+      bars.transition().duration(500).attr('fill', function (b) { return b.x0 >= 7.0 ? '#D95F44' : COL.primary; });
+      counts.transition().duration(400).attr('opacity', 1);
     };
     ctxs[7] = ctx;
 
@@ -1183,7 +1232,15 @@
     var slope = (n * sxy - sx * sy) / (n * sxx - sx * sx);
     var icept = sy / n - slope * sx / n;
 
-    ctxs[8] = { n: 8 };
+    ctxs[8] = {
+      n: 8,
+      evidenceFx: function () {
+        var chipBtn = document.querySelector('#step-8 .chip[data-chip="trend"]');
+        if (!trendG && chipBtn) chipActions[8].trend(chipBtn);
+        pts.transition().duration(450).attr('r', 5)
+          .transition().duration(800).attr('r', 3.6);
+      }
+    };
 
     var trendG = null, ghostG = null;
     chipActions[8] = {
@@ -1327,6 +1384,16 @@
     }
     utilActions[9].layer = function () { setRing(!ringOn()); };
 
+    ctx.evidenceFx = function () {
+      setRing(true);
+      var banner = ensureBanner(9);
+      banner.innerHTML = '<strong>' + M6_ON_RING.length + '</strong> of the <strong>' + M6.length + '</strong> M6+ quakes in this USGS sample sit on the Ring of Fire';
+      banner.classList.add('show');
+      dots.filter(function (d) { return d.mag >= 6; })
+        .transition().duration(450).attr('r', function (d) { return rOf(d) + 4; })
+        .transition().duration(900).attr('r', function (d) { return rOf(d) + 1; });
+    };
+
     var hazardG = null;
     chipActions[9] = {
       pattern: function (btn) {
@@ -1455,10 +1522,228 @@
     document.getElementById('step-5').scrollIntoView({ behavior: 'smooth', block: 'start' });
   });
 
-  // expose internals for the pass-2 interaction layer
+  // expose internals for debugging
   window.LESSON = {
     QUAKES: QUAKES, M6: M6, M6_ON_RING: M6_ON_RING,
     ctxs: ctxs, chipActions: chipActions, setInst: setInst,
     drawRingPath: drawRingPath, COL: COL, pulseAt: pulseAt
   };
+
+  /* ============================================================
+     PASS 2 — answer checking, soft gating, audio narration
+     ============================================================ */
+
+  var ANSWERS = { 1: 'D', 2: 'B', 3: 'B', 4: 'B', 6: 'B', 7: 'B', 8: 'C' };
+
+  var nLow = QUAKES.filter(function (d) { return d.mag < 6; }).length;
+  var n8 = QUAKES.filter(function (d) { return d.mag >= 8; }).length;
+
+  var EXPLAIN = {
+    1: 'Coordinates pin the point, the boundary zone explains the mechanism, and the surrounding dots supply the pattern. Real investigations stack all three clues — that is why “all of these together” is the strongest answer.',
+    2: 'With 800 real quakes on the globe, arcs and bands appear that no single point could ever reveal. The dots don’t get less accurate and the map stays readable — what changes is that the <strong>pattern becomes visible</strong>.',
+    3: 'Use the Compare chip to shuffle the dots at random and the difference is unmistakable: the real dots hug lines, arcs, and clusters along the Pacific rim. Earthquakes are anything but evenly spread.',
+    4: 'Every USGS record stores a longitude, a latitude, a magnitude, a depth, and a time — the map draws two of those numbers and keeps the rest underneath. No field stores “the nearest city”; the place label is added afterwards for humans.',
+    6: 'Raising the cutoff removes weak quakes <em>everywhere</em>, so if the pattern were an accident it would dissolve. Instead the survivors stay glued to the Pacific edge: the band sharpens. Filtering by groups is evidence, not decoration.',
+    7: 'In this real sample, ' + nLow + ' of 800 quakes sit below M6.0, while only ' + n8 + ' reach M8.0 or above. Tall bars on the left, tiny bars far to the right — a long right tail means high-magnitude quakes are rare, not absent.',
+    8: 'The best-fit line is nearly flat (correlation ≈ 0.1 in this sample), and shallow, intermediate, and deep quakes all span the same magnitude range. Depth does <strong>not</strong> predict magnitude here — and reporting “no clear relationship” is doing science correctly.'
+  };
+
+  var FB = {
+    1: { ok: 'Exactly — point, zone, and pattern, stacked together. Watch them pulse on the map.', no: 'Each clue helps, but the power is in stacking all three — watch the map: point, zone, pattern.' },
+    2: { ok: 'Right: more points, clearer shape. Watch Kobe stand alone — then rejoin the pattern.', no: 'Watch the globe: one lonely dot, then 800. The pattern is what changes.' },
+    3: { ok: 'Yes — lines, arcs, clusters. Geometry just became evidence.', no: 'Follow the highlighted path: the dots hug it. That is not random scatter.' },
+    4: { ok: 'Right — location, magnitude, depth, and time, in every dot.', no: 'Read the record card again: four kinds of fields, not one.' },
+    6: { ok: 'Confirmed: the band sharpens as the weak quakes drop away.', no: 'Watch the survivors: they cling to the Pacific edge. The band stands out more, not less.' },
+    7: { ok: 'Right — the long right tail means giants are rare.', no: 'Compare the bars: ' + nLow + ' small quakes vs ' + n8 + ' at M8+. Rare, not common.' },
+    8: { ok: 'Exactly — no clear relationship, and that IS the finding.', no: 'Check the flat best-fit line: depth does not predict magnitude in this sample.' }
+  };
+
+  var completed = {}, skipUnlocked = {}, doneCount = 0;
+
+  function updateProgress() {
+    document.getElementById('progress-fill').style.width = (doneCount / 9 * 100) + '%';
+    document.getElementById('progress-label').textContent = doneCount + ' / 9 checks';
+  }
+
+  function complete(n) {
+    if (completed[n]) return;
+    completed[n] = true;
+    document.getElementById('step-' + n).dataset.done = '1';
+    doneCount++;
+    updateProgress();
+    applyGates();
+  }
+
+  function runEvidenceFx(n) {
+    if (ctxs[n] && ctxs[n].evidenceFx) ctxs[n].evidenceFx();
+  }
+
+  function gradeRadio(n, btn) {
+    var mcq = document.getElementById('mcq-' + n);
+    var sel = mcq.querySelector('input:checked');
+    if (!sel) { setInst(n, 'Pick an answer first, then check it.', 'warn'); return; }
+    if (n === 6 && (!ctxs[6] || ctxs[6].sliderMax < 7)) {
+      setInst(6, 'Evidence first: move the slider to M7.0 or higher and watch the map, then check your answer.', 'error');
+      return;
+    }
+    var ok = sel.value === ANSWERS[n];
+    mcq.querySelectorAll('.mcq-choice').forEach(function (lab) {
+      var inp = lab.querySelector('input');
+      if (inp.value === ANSWERS[n]) lab.classList.add('correct');
+      if (inp === sel && !ok) lab.classList.add('incorrect');
+      inp.disabled = true;
+    });
+    var fb = mcq.querySelector('.mcq-feedback');
+    fb.hidden = false;
+    fb.className = 'mcq-feedback ' + (ok ? 'good' : 'bad');
+    fb.innerHTML = (ok ? '<strong>Correct.</strong> ' : '<strong>Not quite — the correct answer is marked in green.</strong> ') + EXPLAIN[n];
+    btn.disabled = true;
+    btn.textContent = ok ? 'Correct ✓' : 'Answer revealed';
+    runEvidenceFx(n);
+    setInst(n, FB[n][ok ? 'ok' : 'no'], ok ? 'success' : 'error');
+    complete(n);
+  }
+
+  function gradeTags(btn) {
+    var checked = Array.prototype.slice.call(document.querySelectorAll('#mcq-5 input:checked'))
+      .map(function (i) { return i.value; });
+    if (!checked.length) { setInst(5, 'Tag at least one shape you can honestly say you see.', 'warn'); return; }
+    var fb = document.querySelector('#mcq-5 .mcq-feedback');
+    fb.hidden = false;
+    fb.className = 'mcq-feedback good';
+    fb.innerHTML = '<strong>Observations saved:</strong> ' + checked.join(', ') +
+      '. At the notice-and-wonder stage every honest observation counts — scientists collect descriptions first and argue about explanations later. Keep these words: you will need one of them for your final claim in Step 9.';
+    document.querySelectorAll('#mcq-5 input').forEach(function (i) { i.disabled = true; });
+    btn.disabled = true;
+    btn.textContent = 'Observations saved ✓';
+    setInst(5, 'Saved: ' + checked.join(', ') + ' — good noticing. The dots pulse to salute you.', 'success');
+    runEvidenceFx(5);
+    complete(5);
+  }
+
+  var GEO_TERMS = ['band', 'arc', 'line', 'cluster', 'curve', 'ring', 'path', 'loop', 'circle'];
+  var PATTERN_TERMS = ['most', 'many', 'majority', 'rare', 'few', 'almost all', 'percent', 'half', 'nearly all'];
+
+  function gradeClaim(btn) {
+    var t = document.getElementById('claim-text').value.toLowerCase();
+    if (t.trim().length < 15) {
+      setInst(9, 'Write your claim first — a sentence or two in the box on the right.', 'warn');
+      return;
+    }
+    var hasGeo = GEO_TERMS.some(function (w) { return t.indexOf(w) !== -1; });
+    var hasNum = /\d/.test(t) || PATTERN_TERMS.some(function (w) { return t.indexOf(w) !== -1; });
+    var fb = document.querySelector('#mcq-9 .mcq-feedback');
+    if (!hasGeo || !hasNum) {
+      fb.hidden = false;
+      fb.className = 'mcq-feedback bad';
+      var missing = [];
+      if (!hasGeo) missing.push('a <strong>geometry term</strong> (band, arc, line, cluster…)');
+      if (!hasNum) missing.push('a <strong>number or pattern observation</strong> (a count like “' + M6_ON_RING.length + ' of ' + M6.length + '”, or a word like “most” / “rare”)');
+      fb.innerHTML = 'Almost — your claim still needs ' + missing.join(' and ') + '. The Frequency chip on the left gives you a real count to cite.';
+      setInst(9, 'Strengthen the claim: pair a geometry word with a number or pattern word, like a scientist would.', 'error');
+      return;
+    }
+    fb.hidden = false;
+    fb.className = 'mcq-feedback good';
+    fb.innerHTML = '<strong>That is a claim with evidence.</strong> You named a geometric shape and backed it with a quantitative observation — exactly how the Ring of Fire was argued into textbooks. In this USGS sample: ' +
+      M6_ON_RING.length + ' of ' + M6.length + ' M6+ quakes sit on the Ring, magnitudes show a long right tail, and depth does not predict magnitude.';
+    btn.disabled = true;
+    btn.textContent = 'Claim checked ✓';
+    setInst(9, 'Claim accepted — geometry term plus pattern evidence. The Ring lights up for you.', 'success');
+    runEvidenceFx(9);
+    complete(9);
+  }
+
+  document.querySelectorAll('.check-btn').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var n = +btn.dataset.check;
+      if (n === 5) gradeTags(btn);
+      else if (n === 9) gradeClaim(btn);
+      else gradeRadio(n, btn);
+    });
+  });
+
+  /* ---------- soft gating ---------- */
+  function isUnlocked(n) { return n === 1 || completed[n - 1] || skipUnlocked[n]; }
+
+  function showGate(n) {
+    var sec = document.getElementById('step-' + n);
+    var frame = sec.querySelector('.viz-frame');
+    if (!frame.querySelector('.gate-popup')) {
+      var pop = document.createElement('div');
+      pop.className = 'gate-popup';
+      pop.innerHTML =
+        '<div class="gate-popup-inner">' +
+        '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>' +
+        '<span>Answer Step ' + (n - 1) + ' to continue</span>' +
+        '<button class="gate-skip">Skip for now →</button>' +
+        '</div>';
+      frame.appendChild(pop);
+      pop.querySelector('.gate-skip').addEventListener('click', function () {
+        skipUnlocked[n] = true;   // unlocks this step WITHOUT marking step n-1 correct
+        applyGates();
+        if (currentStep === n) playStep(n);
+      });
+    }
+    var col = sec.querySelector('.card-col');
+    if (!col.querySelector('.gate-note')) {
+      var note = document.createElement('div');
+      note.className = 'gate-note';
+      note.textContent = 'Locked: answer Step ' + (n - 1) + ' first, or use “Skip for now” on the left. Skipping won’t mark Step ' + (n - 1) + ' correct.';
+      col.appendChild(note);
+    }
+    pauseAllAudio();   // a gate popup pauses audio immediately
+  }
+
+  function applyGates() {
+    for (var n = 1; n <= 9; n++) {
+      var sec = document.getElementById('step-' + n);
+      var locked = !isUnlocked(n);
+      sec.classList.toggle('locked', locked);
+      if (!locked) {
+        var pop = sec.querySelector('.gate-popup');
+        if (pop) pop.remove();
+        var note = sec.querySelector('.gate-note');
+        if (note) note.remove();
+      }
+    }
+  }
+  applyGates();
+
+  /* ---------- audio narration ---------- */
+  var audios = {};
+  for (var an = 1; an <= 9; an++) audios[an] = document.getElementById('audio-' + an);
+  var audioUnlocked = false;
+  var currentStep = 1;
+
+  function pauseAllAudio(except) {
+    for (var k in audios) { if (+k !== except && !audios[k].paused) audios[k].pause(); }
+  }
+  function playStep(n) {
+    if (!audioUnlocked || !isUnlocked(n)) return;
+    pauseAllAudio(n);
+    var a = audios[n];
+    if (a && a.paused) {
+      a.currentTime = 0;
+      var pr = a.play();
+      if (pr && pr.catch) pr.catch(function () { /* autoplay blocked; ignore */ });
+    }
+  }
+
+  document.addEventListener('pointerdown', function unlockAudio() {
+    audioUnlocked = true;
+    document.removeEventListener('pointerdown', unlockAudio);
+    playStep(currentStep);
+  });
+
+  var stepWatchIO = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) {
+      if (!e.isIntersecting) return;
+      var n = +e.target.dataset.step;
+      currentStep = n;
+      if (!isUnlocked(n)) showGate(n);
+      else playStep(n);
+    });
+  }, { threshold: 0.3 });
+  document.querySelectorAll('.step').forEach(function (sec) { stepWatchIO.observe(sec); });
 })();

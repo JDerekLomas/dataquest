@@ -308,10 +308,17 @@ button { font-family: inherit; cursor: pointer; }
 }
 
 /* ---------- Soft gating (pass 2) ---------- */
-.step.locked .step-inner { opacity: 0.25; pointer-events: none; }
-.step .gate-popup {
+.step.locked .viz-container,
+.step.locked .viz-controls,
+.step.locked .slider-row,
+.step.locked .instruction-bar,
+.step.locked .story-card {
+  opacity: 0.25; pointer-events: none; transition: opacity 0.3s;
+}
+.gate-popup {
   position: absolute; inset: 0; z-index: 5;
   display: flex; align-items: center; justify-content: center;
+  pointer-events: auto;
 }
 .gate-popup-inner {
   display: flex; align-items: center; gap: 12px;
