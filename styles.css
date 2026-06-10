@@ -337,6 +337,45 @@ button { font-family: inherit; cursor: pointer; }
   color: var(--ink-faint);
 }
 
+/* ---------- Kobe shake + year badge + live dots ---------- */
+@keyframes quakeShake {
+  0%, 100% { transform: translate(0, 0); }
+  10% { transform: translate(-2px, 1px); }
+  25% { transform: translate(3px, -1px); }
+  40% { transform: translate(-3px, 2px); }
+  55% { transform: translate(2px, -2px); }
+  70% { transform: translate(-2px, 1px); }
+  85% { transform: translate(1px, -1px); }
+}
+.quake-shake { animation: quakeShake 0.85s linear; }
+
+.year-badge {
+  position: absolute; right: 14px; bottom: 14px;
+  background: rgba(31,41,51,0.88); color: #fff;
+  font-size: 26px; font-weight: 600; letter-spacing: 0.04em;
+  padding: 6px 16px; border-radius: 8px;
+  opacity: 0; transition: opacity 0.3s; pointer-events: none;
+  font-variant-numeric: tabular-nums;
+}
+.year-badge.show { opacity: 1; }
+
+@keyframes livePulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.25; } }
+.live-dot { animation: livePulse 2.2s ease-in-out infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .quake-shake { animation: none; }
+  .live-dot { animation: none; }
+  html { scroll-behavior: auto; }
+}
+
+/* ---------- Touch ---------- */
+@media (pointer: coarse) {
+  .util-btn { width: 40px; height: 40px; font-size: 18px; }
+  .util-btn.util-layer { padding: 0 12px; font-size: 13px; }
+  .chip { padding: 8px 16px; font-size: 14px; }
+  .mcq-choice { padding: 12px 14px; }
+}
+
 /* ---------- Responsive ---------- */
 @media (max-width: 900px) {
   .step-inner { flex-direction: column; }

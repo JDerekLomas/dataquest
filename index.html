@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Map Earth's Anger — Savvas Data Show</title>
-<link rel="stylesheet" href="styles.css?v=3">
+<link rel="stylesheet" href="styles.css?v=4">
 </head>
 <body>
 
@@ -18,6 +18,7 @@
     <span class="progress-label" id="progress-label">0 / 9 checks</span>
   </div>
   <div class="nav-right">
+    <button class="nav-btn" id="nav-sound">Sound: on</button>
     <button class="nav-btn" id="nav-notes">Notes</button>
     <button class="nav-btn" id="nav-data">Data</button>
     <button class="nav-btn" id="nav-explore">Explore</button>
@@ -143,6 +144,7 @@
             <button class="util-btn" data-util="zoom-in" title="Zoom in">+</button>
             <button class="util-btn" data-util="zoom-out" title="Zoom out">−</button>
             <button class="util-btn" data-util="reset" title="Reset view">⟲</button>
+            <button class="util-btn util-layer" data-util="play" title="Replay 25 years in date order">▶ 25 yr</button>
           </div>
         </div>
         <div class="instruction-bar" id="inst-3">Watch the dots arrive. Do they land everywhere — or somewhere?</div>
@@ -405,6 +407,7 @@
             <button class="util-btn" data-util="zoom-out" title="Zoom out">−</button>
             <button class="util-btn" data-util="reset" title="Reset view">⟲</button>
             <button class="util-btn util-layer" data-util="layer" title="Toggle Ring of Fire overlay">Ring</button>
+            <button class="util-btn util-layer" data-util="live" title="Show real quakes from the past 7 days (USGS live feed)">Live</button>
           </div>
         </div>
         <div class="instruction-bar" id="inst-9">The path has a name. Use the map as evidence for your claim.</div>
@@ -467,7 +470,8 @@
 <script src="vendor/topojson-client.min.js"></script>
 <script src="data/land-110m.js"></script>
 <script src="data/land-50m.js"></script>
+<script src="data/plates.js"></script>
 <script src="data/quakes.js"></script>
-<script src="app.js?v=4"></script>
+<script src="app.js?v=5"></script>
 </body>
 </html>

@@ -210,8 +210,13 @@
   function attachDotTips(sel) {
     sel.on('mouseover', function (event, d) { showTip(event, fmtQuake(d.d || d)); })
       .on('mousemove', function (event, d) { showTip(event, fmtQuake(d.d || d)); })
-      .on('mouseout', hideTip);
+      .on('mouseout', hideTip)
+      .on('click', function (event, d) {       // touch devices have no hover
+        event.stopPropagation();
+        showTip(event, fmtQuake(d.d || d));
+      });
   }
+  document.addEventListener('click', hideTip);
 
   function makeFlatMap(n, opts) {
     opts = opts || {};
@@ -297,6 +302,15 @@
 
   function drawHazardZones(ctx) {
     var g = ctx.overlay.append('g');
+    // real plate boundaries (PB2002, Bird 2003) as the base layer
+    if (window.PLATE_BOUNDARIES) {
+      g.append('path').datum(window.PLATE_BOUNDARIES)
+        .attr('d', ctx.path)
+        .attr('fill', 'none')
+        .attr('stroke', COL.hazard)
+        .attr('stroke-width', 1.1)
+        .attr('stroke-opacity', 0.65);
+    }
     HAZARD_ZONES.forEach(function (z) {
       g.append('path').datum({ type: 'LineString', coordinates: z.coords })
         .attr('d', ctx.path)
@@ -433,6 +447,36 @@
       'zoom-in': function () { svg.transition().duration(350).call(zoom.scaleBy, 1.6); },
       'zoom-out': function () { svg.transition().duration(350).call(zoom.scaleBy, 1 / 1.6); },
       'reset': function () { svg.transition().duration(450).call(zoom.transform, d3.zoomIdentity); }
+    };
+
+    // entry moment: the ground moves, then a seismogram draws itself
+    var entryPlayed = false;
+    ctx.entryAnimation = function () {
+      if (entryPlayed) return; entryPlayed = true;
+      var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      var frame = frameOf(1);
+      if (!reduced) {
+        frame.classList.add('quake-shake');
+        setTimeout(function () { frame.classList.remove('quake-shake'); }, 950);
+      }
+      var sg = fxG.append('g').attr('transform', 'translate(14,14)');
+      sg.append('rect').attr('width', 190).attr('height', 50).attr('rx', 6)
+        .attr('fill', 'rgba(255,255,255,0.93)').attr('stroke', '#C9D1DA');
+      sg.append('text').attr('x', 9).attr('y', 14)
+        .attr('font-size', 9).attr('font-weight', 600).attr('fill', '#52606D')
+        .text('SEISMOGRAM · KOBE · 05:46:52');
+      var pts = [];
+      for (var x = 0; x <= 172; x += 2) {
+        var a = x < 56 ? 1.3 : x < 74 ? 14 * (x - 56) / 18 : 14 * Math.exp(-(x - 74) / 26);
+        pts.push([x + 9, 33 + Math.sin(x * 1.9) * a * 0.6 + Math.sin(x * 0.7) * a * 0.4]);
+      }
+      var trace = sg.append('path')
+        .attr('d', 'M' + pts.map(function (p) { return p.join(','); }).join('L'))
+        .attr('fill', 'none').attr('stroke', COL.quake).attr('stroke-width', 1.4);
+      var L = trace.node().getTotalLength();
+      trace.attr('stroke-dasharray', L + ' ' + L).attr('stroke-dashoffset', L)
+        .transition().duration(reduced ? 0 : 2400).ease(d3.easeLinear)
+        .attr('stroke-dashoffset', 0);
     };
 
     // evidence highlight when the step-1 check is submitted
@@ -719,6 +763,48 @@
       setTimeout(function () { p.transition().duration(900).attr('stroke-opacity', 0).remove(); }, 4500);
     };
 
+    // time-lapse: replay the 25-year sample in date order
+    var playing = false;
+    utilActions[3].play = function (btn) {
+      if (playing) return;
+      playing = true; animated = true;
+      btn.classList.add('active');
+      var sorted = QUAKES.slice().sort(function (a, b) { return a.date < b.date ? -1 : 1; });
+      var order = {};
+      sorted.forEach(function (d, i) { order[d.id] = i; });
+      var frame = frameOf(3);
+      var badge = frame.querySelector('.year-badge');
+      if (!badge) {
+        badge = document.createElement('div');
+        badge.className = 'year-badge';
+        frame.appendChild(badge);
+      }
+      var T = 13000;
+      dots.interrupt().transition('timeplay').duration(250).attr('r', 0);
+      dots.transition('timeplay-in')
+        .delay(function (d) { return 400 + order[d.id] / sorted.length * T; })
+        .duration(380).ease(d3.easeBackOut)
+        .attr('r', rOf);
+      badge.textContent = sorted[0].date.slice(0, 4);
+      badge.classList.add('show');
+      var t0 = Date.now();
+      var tick = d3.interval(function () {
+        var f = Math.min(1, (Date.now() - t0 - 400) / T);
+        if (f >= 0) {
+          var idx = Math.min(sorted.length - 1, Math.floor(f * sorted.length));
+          badge.textContent = sorted[idx].date.slice(0, 4);
+        }
+        if (f >= 1) {
+          tick.stop();
+          playing = false;
+          btn.classList.remove('active');
+          setTimeout(function () { badge.classList.remove('show'); }, 1800);
+          if (!stepDone(3)) setInst(3, '25 years, one pattern: the same edges light up again and again. That stability is the evidence.', 'info');
+        }
+      }, 90);
+      setInst(3, 'Replaying 2000 → 2025 in date order. Watch where the years land.', 'info');
+    };
+
     var ringP = null, hazardG = null, randomMode = false;
     chipActions[3] = {
       pattern: function (btn) {
@@ -748,7 +834,7 @@
       boundary: function (btn) {
         toggleChip(btn, function () {
           hazardG = drawHazardZones(ctx);
-          setInst(3, 'Named boundary zones — Nankai, Cascadia, Chile–Peru, the Aleutians, Philippines–Indonesia — sit exactly where the dots crowd.', 'info');
+          setInst(3, 'Real plate boundaries (PB2002 dataset) in amber, with five named hazard zones. The dots sit on the seams of the planet.', 'info');
         }, function () {
           if (hazardG) { hazardG.remove(); hazardG = null; }
           setInst(3, 'Watch the dots arrive. Do they land everywhere — or somewhere?');
@@ -915,7 +1001,7 @@
       boundary: function (btn) {
         toggleChip(btn, function () {
           hazardG = drawHazardZones(ctx);
-          setInst(5, 'Boundary zones overlaid. Notice how each named zone matches a shape you might have tagged.', 'info');
+          setInst(5, 'Real plate boundaries overlaid. Notice how each shape you tagged follows one of the planet’s seams.', 'info');
         }, function () {
           if (hazardG) { hazardG.remove(); hazardG = null; }
           setInst(5, 'Pan, zoom, hover. Explore freely — there is no wrong observation here.');
@@ -1384,6 +1470,50 @@
     }
     utilActions[9].layer = function () { setRing(!ringOn()); };
 
+    // live USGS feed: real quakes from the past 7 days (online only)
+    var liveG = null, liveCache = null;
+    function renderLive(events, btn) {
+      liveG = ctx.fxG.append('g');
+      events.forEach(function (q, i) {
+        var p = ctx.projection([q.lon, q.lat]);
+        if (!p) return;
+        liveG.append('circle')
+          .attr('class', 'live-dot')
+          .attr('cx', p[0]).attr('cy', p[1])
+          .attr('r', 2 + (q.mag - 4.5) * 1.3)
+          .attr('fill', 'none').attr('stroke', '#FFFFFF').attr('stroke-width', 1.6)
+          .style('animation-delay', (i % 10) * 0.22 + 's');
+        setTimeout(function () { pulseAt(ctx, [q.lon, q.lat], '#fff', 1); }, i * 90);
+      });
+      var banner = ensureBanner(9);
+      banner.innerHTML = '<strong>' + events.length + '</strong> real M4.5+ earthquakes in the past 7 days — USGS live feed';
+      banner.classList.add('show');
+      setInst(9, 'White rings are this week’s real earthquakes. The Ring of Fire is not history — it is happening now.', 'info');
+      if (btn) btn.classList.add('active');
+    }
+    utilActions[9].live = function (btn) {
+      if (liveG) {
+        liveG.remove(); liveG = null;
+        ensureBanner(9).classList.remove('show');
+        btn.classList.remove('active');
+        if (!stepDone(9)) setInst(9, 'The path has a name. Use the map as evidence for your claim.');
+        return;
+      }
+      if (liveCache) { renderLive(liveCache, btn); return; }
+      setInst(9, 'Contacting the USGS live feed…', 'info');
+      fetch('https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/4.5_week.geojson')
+        .then(function (r) { return r.json(); })
+        .then(function (j) {
+          liveCache = j.features.map(function (f) {
+            return { lon: f.geometry.coordinates[0], lat: f.geometry.coordinates[1], mag: f.properties.mag || 4.5 };
+          });
+          renderLive(liveCache, btn);
+        })
+        .catch(function () {
+          setInst(9, 'Live feed unavailable (offline) — the 25-year sample still tells the story.', 'warn');
+        });
+    };
+
     ctx.evidenceFx = function () {
       setRing(true);
       var banner = ensureBanner(9);
@@ -1429,7 +1559,7 @@
       boundary: function (btn) {
         toggleChip(btn, function () {
           hazardG = drawHazardZones(ctx);
-          setInst(9, 'The Ring is not one fault but a chain of boundary zones — each named segment is its own hazard story.', 'info');
+          setInst(9, 'The Ring is not one fault but a chain of real plate boundaries — each named segment is its own hazard story.', 'info');
         }, function () {
           if (hazardG) { hazardG.remove(); hazardG = null; }
           setInst(9, 'The path has a name. Use the map as evidence for your claim.');
@@ -1533,6 +1663,19 @@
      PASS 2 — answer checking, soft gating, audio narration
      ============================================================ */
 
+  /* persisted student state (survives refresh) */
+  var STORE_KEY = 'dataquest-state-v1';
+  var state = { answers: {}, claim: '', notes: '', skips: {}, muted: false };
+  try {
+    var saved = JSON.parse(localStorage.getItem(STORE_KEY));
+    if (saved && typeof saved === 'object') {
+      for (var sk in state) if (saved[sk] !== undefined) state[sk] = saved[sk];
+    }
+  } catch (e) { /* fresh start */ }
+  function saveState() {
+    try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch (e) { /* private mode */ }
+  }
+
   var ANSWERS = { 1: 'D', 2: 'B', 3: 'B', 4: 'B', 6: 'B', 7: 'B', 8: 'C' };
 
   var nLow = QUAKES.filter(function (d) { return d.mag < 6; }).length;
@@ -1558,7 +1701,7 @@
     8: { ok: 'Exactly — no clear relationship, and that IS the finding.', no: 'Check the flat best-fit line: depth does not predict magnitude in this sample.' }
   };
 
-  var completed = {}, skipUnlocked = {}, doneCount = 0;
+  var completed = {}, skipUnlocked = state.skips || {}, doneCount = 0;
 
   function updateProgress() {
     document.getElementById('progress-fill').style.width = (doneCount / 9 * 100) + '%';
@@ -1578,19 +1721,15 @@
     if (ctxs[n] && ctxs[n].evidenceFx) ctxs[n].evidenceFx();
   }
 
-  function gradeRadio(n, btn) {
+  function renderGradeRadio(n, value, silent) {
     var mcq = document.getElementById('mcq-' + n);
-    var sel = mcq.querySelector('input:checked');
-    if (!sel) { setInst(n, 'Pick an answer first, then check it.', 'warn'); return; }
-    if (n === 6 && (!ctxs[6] || ctxs[6].sliderMax < 7)) {
-      setInst(6, 'Evidence first: move the slider to M7.0 or higher and watch the map, then check your answer.', 'error');
-      return;
-    }
-    var ok = sel.value === ANSWERS[n];
+    var btn = mcq.querySelector('.check-btn');
+    var ok = value === ANSWERS[n];
     mcq.querySelectorAll('.mcq-choice').forEach(function (lab) {
       var inp = lab.querySelector('input');
+      if (inp.value === value) inp.checked = true;
       if (inp.value === ANSWERS[n]) lab.classList.add('correct');
-      if (inp === sel && !ok) lab.classList.add('incorrect');
+      if (inp.value === value && !ok) lab.classList.add('incorrect');
       inp.disabled = true;
     });
     var fb = mcq.querySelector('.mcq-feedback');
@@ -1599,26 +1738,49 @@
     fb.innerHTML = (ok ? '<strong>Correct.</strong> ' : '<strong>Not quite — the correct answer is marked in green.</strong> ') + EXPLAIN[n];
     btn.disabled = true;
     btn.textContent = ok ? 'Correct ✓' : 'Answer revealed';
-    runEvidenceFx(n);
+    if (!silent) runEvidenceFx(n);
     setInst(n, FB[n][ok ? 'ok' : 'no'], ok ? 'success' : 'error');
     complete(n);
+  }
+
+  function gradeRadio(n, btn) {
+    var mcq = document.getElementById('mcq-' + n);
+    var sel = mcq.querySelector('input:checked');
+    if (!sel) { setInst(n, 'Pick an answer first, then check it.', 'warn'); return; }
+    if (n === 6 && (!ctxs[6] || ctxs[6].sliderMax < 7)) {
+      setInst(6, 'Evidence first: move the slider to M7.0 or higher and watch the map, then check your answer.', 'error');
+      return;
+    }
+    state.answers[n] = sel.value;
+    saveState();
+    renderGradeRadio(n, sel.value, false);
+  }
+
+  function renderTags(values, silent) {
+    var fb = document.querySelector('#mcq-5 .mcq-feedback');
+    document.querySelectorAll('#mcq-5 input').forEach(function (i) {
+      if (values.indexOf(i.value) !== -1) i.checked = true;
+      i.disabled = true;
+    });
+    fb.hidden = false;
+    fb.className = 'mcq-feedback good';
+    fb.innerHTML = '<strong>Observations saved:</strong> ' + values.join(', ') +
+      '. At the notice-and-wonder stage every honest observation counts — scientists collect descriptions first and argue about explanations later. Keep these words: you will need one of them for your final claim in Step 9.';
+    var btn = document.querySelector('#mcq-5 .check-btn');
+    btn.disabled = true;
+    btn.textContent = 'Observations saved ✓';
+    setInst(5, 'Saved: ' + values.join(', ') + ' — good noticing. The dots pulse to salute you.', 'success');
+    if (!silent) runEvidenceFx(5);
+    complete(5);
   }
 
   function gradeTags(btn) {
     var checked = Array.prototype.slice.call(document.querySelectorAll('#mcq-5 input:checked'))
       .map(function (i) { return i.value; });
     if (!checked.length) { setInst(5, 'Tag at least one shape you can honestly say you see.', 'warn'); return; }
-    var fb = document.querySelector('#mcq-5 .mcq-feedback');
-    fb.hidden = false;
-    fb.className = 'mcq-feedback good';
-    fb.innerHTML = '<strong>Observations saved:</strong> ' + checked.join(', ') +
-      '. At the notice-and-wonder stage every honest observation counts — scientists collect descriptions first and argue about explanations later. Keep these words: you will need one of them for your final claim in Step 9.';
-    document.querySelectorAll('#mcq-5 input').forEach(function (i) { i.disabled = true; });
-    btn.disabled = true;
-    btn.textContent = 'Observations saved ✓';
-    setInst(5, 'Saved: ' + checked.join(', ') + ' — good noticing. The dots pulse to salute you.', 'success');
-    runEvidenceFx(5);
-    complete(5);
+    state.answers[5] = checked;
+    saveState();
+    renderTags(checked, false);
   }
 
   var GEO_TERMS = ['band', 'arc', 'line', 'cluster', 'curve', 'ring', 'path', 'loop', 'circle'];
@@ -1643,6 +1805,12 @@
       setInst(9, 'Strengthen the claim: pair a geometry word with a number or pattern word, like a scientist would.', 'error');
       return;
     }
+    renderClaimAccepted(false);
+  }
+
+  function renderClaimAccepted(silent) {
+    var fb = document.querySelector('#mcq-9 .mcq-feedback');
+    var btn = document.querySelector('#mcq-9 .check-btn');
     fb.hidden = false;
     fb.className = 'mcq-feedback good';
     fb.innerHTML = '<strong>That is a claim with evidence.</strong> You named a geometric shape and backed it with a quantitative observation — exactly how the Ring of Fire was argued into textbooks. In this USGS sample: ' +
@@ -1650,7 +1818,8 @@
     btn.disabled = true;
     btn.textContent = 'Claim checked ✓';
     setInst(9, 'Claim accepted — geometry term plus pattern evidence. The Ring lights up for you.', 'success');
-    runEvidenceFx(9);
+    if (!silent) runEvidenceFx(9);
+    if (!silent) { state.answers[9] = true; saveState(); }
     complete(9);
   }
 
@@ -1681,6 +1850,8 @@
       frame.appendChild(pop);
       pop.querySelector('.gate-skip').addEventListener('click', function () {
         skipUnlocked[n] = true;   // unlocks this step WITHOUT marking step n-1 correct
+        state.skips[n] = true;
+        saveState();
         applyGates();
         if (currentStep === n) playStep(n);
       });
@@ -1720,7 +1891,7 @@
     for (var k in audios) { if (+k !== except && !audios[k].paused) audios[k].pause(); }
   }
   function playStep(n) {
-    if (!audioUnlocked || !isUnlocked(n)) return;
+    if (!audioUnlocked || state.muted || !isUnlocked(n)) return;
     pauseAllAudio(n);
     var a = audios[n];
     if (a && a.paused) {
@@ -1746,4 +1917,36 @@
     });
   }, { threshold: 0.3 });
   document.querySelectorAll('.step').forEach(function (sec) { stepWatchIO.observe(sec); });
+
+  /* ---------- mute toggle ---------- */
+  var soundBtn = document.getElementById('nav-sound');
+  function syncSoundBtn() {
+    soundBtn.textContent = state.muted ? 'Sound: off' : 'Sound: on';
+    soundBtn.style.background = state.muted ? '#52606D' : '';
+  }
+  soundBtn.addEventListener('click', function () {
+    state.muted = !state.muted;
+    saveState();
+    syncSoundBtn();
+    if (state.muted) pauseAllAudio();
+    else playStep(currentStep);
+  });
+  syncSoundBtn();
+
+  /* ---------- restore persisted progress ---------- */
+  var notesEl = document.getElementById('notes-text');
+  var claimEl = document.getElementById('claim-text');
+  if (state.notes) notesEl.value = state.notes;
+  if (state.claim) claimEl.value = state.claim;
+  notesEl.addEventListener('input', function () { state.notes = notesEl.value; saveState(); });
+  claimEl.addEventListener('input', function () { state.claim = claimEl.value; saveState(); });
+
+  for (var rn = 1; rn <= 9; rn++) {
+    var v = state.answers[rn];
+    if (v === undefined || v === null) continue;
+    if (rn === 5) renderTags(v, true);
+    else if (rn === 9) renderClaimAccepted(true);
+    else renderGradeRadio(rn, v, true);
+  }
+  applyGates();
 })();
