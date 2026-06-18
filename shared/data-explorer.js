@@ -16,7 +16,56 @@
 
   function val(col, row) { return col.get ? col.get(row) : row[col.key]; }
   function isNumCol(c) { return c.type === 'number'; }
-  function numVals(col) { return ROWS.map(function (r) { return val(col, r); }).filter(function (v) { return v != null && v !== '' && isFinite(v); }).map(Number); }
+  function numVals(col, rows) { return (rows || ROWS).map(function (r) { return val(col, r); }).filter(function (v) { return v != null && v !== '' && isFinite(v); }).map(Number); }
+
+  /* ---------- shared row filter (feeds Chart + Pivot) ---------- */
+  var FILTERS = [], filterSubs = [];
+  function activeRows() { return FILTERS.length ? ROWS.filter(function (r) { return FILTERS.every(function (f) { return f.test(r); }); }) : ROWS; }
+  function notifyFilters() { filterSubs.slice().forEach(function (fn) { fn(); }); }
+  function addFilter(col) {
+    if (isNumCol(col)) {
+      var v = numVals(col);
+      FILTERS.push({ col: col, kind: 'range', min: v.length ? Math.floor(d3.min(v) * 100) / 100 : -Infinity, max: v.length ? Math.ceil(d3.max(v) * 100) / 100 : Infinity,
+        test: function (r) { var x = val(col, r); return x != null && isFinite(x) && x >= this.min && x <= this.max; } });
+    } else {
+      var keys = groupKeys(col).map(function (k) { return k.key; });
+      if (keys.length <= 30) FILTERS.push({ col: col, kind: 'cats', values: keys, set: new Set(keys), test: function (r) { var x = val(col, r); x = (x == null || x === '') ? '(none)' : x; return this.set.has(x); } });
+      else FILTERS.push({ col: col, kind: 'text', q: '', test: function (r) { var x = val(col, r); return x != null && String(x).toLowerCase().indexOf(this.q.toLowerCase()) !== -1; } });
+    }
+  }
+  function renderFilterBar(container) {
+    container.innerHTML = '';
+    container.appendChild(el('span', 'dx-filter-label', 'Filter'));
+    FILTERS.forEach(function (f, idx) {
+      var pill = el('span', 'dx-filter-pill');
+      pill.appendChild(el('span', 'dx-filter-col', f.col.label));
+      if (f.kind === 'range') {
+        var mn = el('input', 'dx-filter-num'); mn.type = 'number'; mn.value = f.min; mn.title = 'min';
+        var mx = el('input', 'dx-filter-num'); mx.type = 'number'; mx.value = f.max; mx.title = 'max';
+        mn.oninput = function () { f.min = mn.value === '' ? -Infinity : +mn.value; notifyFilters(); };
+        mx.oninput = function () { f.max = mx.value === '' ? Infinity : +mx.value; notifyFilters(); };
+        pill.appendChild(mn); pill.appendChild(el('span', 'dx-filter-sep', '–')); pill.appendChild(mx);
+      } else if (f.kind === 'cats') {
+        f.values.forEach(function (v) {
+          var chip = el('button', 'dx-filter-chip' + (f.set.has(v) ? ' on' : ''), String(v));
+          chip.onclick = function () { if (f.set.has(v)) f.set['delete'](v); else f.set.add(v); notifyFilters(); };
+          pill.appendChild(chip);
+        });
+      } else {
+        var inp = el('input', 'dx-filter-text'); inp.type = 'search'; inp.placeholder = 'contains…'; inp.value = f.q;
+        inp.oninput = function () { f.q = inp.value; notifyFilters(); };
+        pill.appendChild(inp);
+      }
+      var rm = el('button', 'dx-filter-x', '×'); rm.title = 'remove filter'; rm.onclick = function () { FILTERS.splice(idx, 1); notifyFilters(); };
+      pill.appendChild(rm); container.appendChild(pill);
+    });
+    var add = el('select', 'dx-filter-add'); var def = el('option'); def.value = ''; def.textContent = '+ add filter'; add.appendChild(def);
+    COLS.forEach(function (c) { if (FILTERS.some(function (f) { return f.col === c; })) return; var o = el('option'); o.value = c.key; o.textContent = c.label; add.appendChild(o); });
+    add.onchange = function () { var c = colByKey(add.value); if (c) { addFilter(c); notifyFilters(); } };
+    container.appendChild(add);
+    var n = activeRows().length;
+    container.appendChild(el('span', 'dx-filter-count', n.toLocaleString() + ' of ' + ROWS.length.toLocaleString() + ' rows' + (n !== ROWS.length ? ' match' : '')));
+  }
   function fmt(v) {
     if (v == null || v === '') return '—';
     if (typeof v === 'number') { if (!isFinite(v)) return '—'; var a = Math.abs(v); if (a !== 0 && (a < 0.001 || a >= 100000)) return v.toExponential(2); return (Math.round(v * 1000) / 1000).toLocaleString(); }
@@ -38,14 +87,15 @@
     return null;
   }
   // group rows by a column; numeric columns auto-bin, date binned by year
-  function groupKeys(col) {
+  function groupKeys(col, rows) {
+    rows = rows || ROWS;
     if (col.type === 'category') {
       var set = {};
-      ROWS.forEach(function (r) { var k = val(col, r); if (k == null || k === '') k = '(none)'; set[k] = (set[k] || 0) + 1; });
+      rows.forEach(function (r) { var k = val(col, r); if (k == null || k === '') k = '(none)'; set[k] = (set[k] || 0) + 1; });
       return Object.keys(set).sort(function (a, b) { return set[b] - set[a]; }).map(function (k) { return { key: k, test: (function (kk) { return function (r) { var x = val(col, r); return (x == null || x === '' ? '(none)' : x) === kk; }; })(k) }; });
     }
     // numeric / date → bins
-    var vals = numVals(col); if (!vals.length) return [];
+    var vals = numVals(col, rows); if (!vals.length) return [];
     var lo = d3.min(vals), hi = d3.max(vals), nb = 8;
     if (lo === hi) return [{ key: fmt(lo), test: function () { return true; } }];
     var step = (hi - lo) / nb, bins = [];
@@ -192,7 +242,10 @@
         if (st.type === 'scatter') ctrls.appendChild(check('Fit line', st.fit, function (v) { st.fit = v; draw(); }));
       }
     }
-    pane.appendChild(ctrls); pane.appendChild(plot); pane.appendChild(legend); pane.appendChild(note);
+    var fbar = el('div', 'dx-filterbar');
+    pane.appendChild(fbar); pane.appendChild(ctrls); pane.appendChild(plot); pane.appendChild(legend); pane.appendChild(note);
+    filterSubs.push(function () { renderFilterBar(fbar); draw(); });
+    renderFilterBar(fbar);
 
     // choose a scale: explicit linear/log, or 'auto' (log when all-positive & spans >1000x)
     function makeScale(vals, mode, range) {
@@ -222,8 +275,8 @@
 
       if (st.type === 'scatter' || st.type === 'line') {
         if (!cx || !cy) { plot.innerHTML = '<div class="dx-empty">Pick an X and Y column.</div>'; return; }
-        var total = ROWS.length;
-        var pts = ROWS.map(function (r) { return { x: +val(cx, r), y: +val(cy, r), r: r }; }).filter(function (p) { return isFinite(p.x) && isFinite(p.y); });
+        var arows = activeRows(), total = arows.length;
+        var pts = arows.map(function (r) { return { x: +val(cx, r), y: +val(cy, r), r: r }; }).filter(function (p) { return isFinite(p.x) && isFinite(p.y); });
         var missing = total - pts.length;
         var sx = makeScale(pts.map(function (p) { return p.x; }), st.xs, [0, iw]);
         var sy = makeScale(pts.map(function (p) { return p.y; }), st.ys, [ih, 0]);
@@ -241,7 +294,7 @@
         } else {
           var ccol = st.color ? colByKey(st.color) : null;
           var palette = ['#1B5FAA', '#E8704F', '#1E7D45', '#9C6FB8', '#E2A33D', '#3B82C4', '#C0392B', '#7A828C'];
-          var keys = ccol ? groupKeys(ccol).slice(0, 8).map(function (k) { return k.key; }) : [];
+          var keys = ccol ? groupKeys(ccol, arows).slice(0, 8).map(function (k) { return k.key; }) : [];
           g.selectAll('circle').data(pts).join('circle').attr('cx', function (p) { return x(p.x); }).attr('cy', function (p) { return y(p.y); }).attr('r', pts.length > 2500 ? 1.8 : 2.4).attr('fill-opacity', pts.length > 2500 ? .4 : .55)
             .attr('fill', function (p) { if (!ccol) return '#1B5FAA'; var k = val(ccol, p.r); k = (k == null || k === '') ? '(none)' : k; var i = keys.indexOf(k); return i < 0 ? '#7A828C' : palette[i % palette.length]; })
             .append('title').text(function (p) { return ptTitle(p.r, cx, cy); });
@@ -265,7 +318,7 @@
         if (sy.forcedLogFail) notes.push('Y has ≤0 values — log not applied');
       } else if (st.type === 'histogram') {
         if (!cx) { plot.innerHTML = '<div class="dx-empty">Pick a value column.</div>'; return; }
-        var vals = numVals(cx); if (!vals.length) { plot.innerHTML = '<div class="dx-empty">No numeric values.</div>'; return; }
+        var vals = numVals(cx, activeRows()); if (!vals.length) { plot.innerHTML = '<div class="dx-empty">No numeric values.</div>'; return; }
         var sxh = makeScale(vals, st.xs, [0, iw]);
         var vv = sxh.log ? vals.filter(function (v) { return v > 0; }) : vals;
         if (sxh.log) sxh.scale.domain(d3.extent(vv)).nice();
@@ -283,8 +336,9 @@
       } else if (st.type === 'bar') {
         var gc = colByKey(st.x); if (!gc) { plot.innerHTML = '<div class="dx-empty">Pick a group-by column.</div>'; return; }
         var vc = colByKey(st.y);
-        var groups = groupKeys(gc).slice(0, 30).map(function (gk) {
-          var rs = ROWS.filter(gk.test); var v = st.agg === 'count' ? rs.length : agg(rs.map(function (r) { return +val(vc, r); }), st.agg);
+        var brows = activeRows();
+        var groups = groupKeys(gc, brows).slice(0, 30).map(function (gk) {
+          var rs = brows.filter(gk.test); var v = st.agg === 'count' ? rs.length : agg(rs.map(function (r) { return +val(vc, r); }), st.agg);
           return { key: gk.key, v: v || 0 };
         });
         if (gc.type === 'category') groups.sort(function (a, b) { return b.v - a.v; });
@@ -309,68 +363,109 @@
     rebuildControls(); draw();
   }
 
-  /* ---------- PIVOT ---------- */
+  /* ---------- PIVOT (1-way + 2-way crosstab) ---------- */
   function buildPivot(pane) {
     pane.innerHTML = '';
     var nums = COLS.filter(isNumCol);
     var groupables = COLS.filter(function (c) { return c.groupable !== false; });
     var d = (cfg.defaults && cfg.defaults.pivot) || {};
-    var st = { group: d.group || (groupables[0] && groupables[0].key), value: d.value || (nums[0] && nums[0].key), agg: d.agg || 'count' };
+    var st = { group: d.group || (groupables[0] && groupables[0].key), col: '', value: d.value || (nums[0] && nums[0].key), agg: d.agg || 'count' };
 
+    var fbar = el('div', 'dx-filterbar');
     var ctrls = el('div', 'dx-controls');
     function sel(label, opts, cur, on) { var c = el('label', 'dx-ctl', label + ' '); var s = el('select'); opts.forEach(function (o) { var op = el('option'); op.value = o.v; op.textContent = o.t; if (o.v === cur) op.selected = true; s.appendChild(op); }); s.onchange = function () { on(s.value); }; c.appendChild(s); return c; }
-    ctrls.appendChild(sel('Group by (rows)', groupables.map(function (c) { return { v: c.key, t: c.label }; }), st.group, function (v) { st.group = v; render(); }));
+    ctrls.appendChild(sel('Rows', groupables.map(function (c) { return { v: c.key, t: c.label }; }), st.group, function (v) { st.group = v; render(); }));
+    ctrls.appendChild(sel('Columns', [{ v: '', t: '(none)' }].concat(groupables.map(function (c) { return { v: c.key, t: c.label }; })), st.col, function (v) { st.col = v; render(); }));
     ctrls.appendChild(sel('Aggregate', [{ v: 'count', t: 'Count' }, { v: 'mean', t: 'Mean' }, { v: 'sum', t: 'Sum' }, { v: 'min', t: 'Min' }, { v: 'max', t: 'Max' }, { v: 'median', t: 'Median' }], st.agg, function (v) { st.agg = v; render(); }));
     ctrls.appendChild(sel('Value', nums.map(function (c) { return { v: c.key, t: c.label }; }), st.value, function (v) { st.value = v; render(); }));
-    pane.appendChild(ctrls);
+    pane.appendChild(fbar); pane.appendChild(ctrls);
 
-    var layout = el('div', 'dx-pivot-layout');
-    var tableWrap = el('div', null, ''); var chartWrap = el('div', 'dx-plot');
-    layout.appendChild(tableWrap); layout.appendChild(chartWrap); pane.appendChild(layout);
-    var dlRow = el('div', null, ''); dlRow.style.marginTop = '12px'; pane.appendChild(dlRow);
+    var tableWrap = el('div', 'dx-tablewrap'); var chartWrap = el('div', 'dx-plot'); chartWrap.style.marginTop = '14px';
+    var dlRow = el('div', null, ''); dlRow.style.marginTop = '12px';
+    pane.appendChild(tableWrap); pane.appendChild(chartWrap); pane.appendChild(dlRow);
+
+    function cellVal(rs, vc) { return st.agg === 'count' ? rs.length : agg(rs.map(function (r) { return +val(vc, r); }), st.agg); }
+    var palette = ['#1B5FAA', '#E8704F', '#1E7D45', '#9C6FB8', '#E2A33D', '#3B82C4', '#C0392B', '#7A828C', '#5C8A5C', '#B0833D', '#6FA8C7', '#A86FB8'];
 
     function render() {
-      var gc = colByKey(st.group), vc = colByKey(st.value);
-      var groups = groupKeys(gc).map(function (gk) {
-        var rs = ROWS.filter(gk.test);
-        var v = st.agg === 'count' ? rs.length : agg(rs.map(function (r) { return +val(vc, r); }), st.agg);
-        return { key: gk.key, v: v == null ? 0 : v, n: rs.length };
-      }).filter(function (r) { return r.n > 0; });
-      if (gc.type === 'category') groups.sort(function (a, b) { return b.v - a.v; });
-
-      // table
+      var rows = activeRows();
+      var gc = colByKey(st.group), vc = colByKey(st.value), cc = st.col ? colByKey(st.col) : null;
       var valLabel = st.agg === 'count' ? 'Count' : (st.agg + ' of ' + vc.label);
-      var t = el('table', 'dx-table');
-      t.innerHTML = '<thead><tr><th>' + gc.label + '</th><th class="num">' + valLabel + '</th><th class="num">n rows</th></tr></thead><tbody>' +
-        groups.map(function (r) { return '<tr><td>' + r.key + '</td><td class="num">' + fmt(r.v) + '</td><td class="num">' + r.n + '</td></tr>'; }).join('') + '</tbody>';
-      var tw = el('div', 'dx-tablewrap'); tw.appendChild(t); tableWrap.innerHTML = ''; tableWrap.appendChild(tw);
 
-      // horizontal bar chart
+      if (!cc) {
+        // ---- 1-way ----
+        var groups = groupKeys(gc, rows).map(function (gk) { var rs = rows.filter(gk.test); return { key: gk.key, v: cellVal(rs, vc) || 0, n: rs.length }; }).filter(function (r) { return r.n > 0; });
+        if (gc.type === 'category') groups.sort(function (a, b) { return b.v - a.v; });
+        var t = el('table', 'dx-table');
+        t.innerHTML = '<thead><tr><th>' + gc.label + '</th><th class="num">' + valLabel + '</th><th class="num">n rows</th></tr></thead><tbody>' +
+          groups.map(function (r) { return '<tr><td>' + r.key + '</td><td class="num">' + fmt(r.v) + '</td><td class="num">' + r.n + '</td></tr>'; }).join('') + '</tbody>';
+        tableWrap.innerHTML = ''; tableWrap.appendChild(t);
+
+        chartWrap.innerHTML = '';
+        var top = groups.slice(0, 16);
+        var W = chartWrap.clientWidth || 760, rowH = 26, H = Math.max(120, top.length * rowH + 30), M = { t: 10, r: 56, b: 10, l: 140 }, iw = W - M.l - M.r;
+        var gg = d3.select(chartWrap).append('svg').attr('viewBox', '0 0 ' + W + ' ' + H).append('g').attr('transform', 'translate(' + M.l + ',' + M.t + ')');
+        var x = d3.scaleLinear().domain([0, d3.max(top, function (r) { return r.v; }) || 1]).range([0, iw]);
+        var y = d3.scaleBand().domain(top.map(function (r) { return r.key; })).range([0, H - M.t - M.b]).padding(.22);
+        gg.append('g').call(d3.axisLeft(y).tickSize(0)).selectAll('text').attr('font-size', 10).each(function () { var t2 = d3.select(this); var s = t2.text(); if (s.length > 18) t2.text(s.slice(0, 17) + '…'); });
+        gg.selectAll('rect').data(top).join('rect').attr('x', 0).attr('y', function (r) { return y(r.key); }).attr('height', y.bandwidth()).attr('width', function (r) { return x(r.v); }).attr('fill', '#1B5FAA').attr('fill-opacity', .85);
+        gg.selectAll('text.v').data(top).join('text').attr('class', 'v').attr('x', function (r) { return x(r.v) + 5; }).attr('y', function (r) { return y(r.key) + y.bandwidth() / 2 + 3.5; }).attr('font-size', 10).attr('fill', '#52606D').text(function (r) { return fmt(r.v); });
+
+        var pcols = [{ key: 'group', label: gc.label, get: function (r) { return r.key; } }, { key: 'value', label: valLabel, get: function (r) { return r.v; } }, { key: 'n', label: 'n rows', get: function (r) { return r.n; } }];
+        dlRow.innerHTML = ''; var bb = el('button', 'dx-btn primary', '↓ Download pivot CSV'); bb.onclick = function () { download((cfg.filename || 'data') + '-pivot.csv', toCSV(pcols, groups), 'text/csv'); }; dlRow.appendChild(bb);
+        return;
+      }
+
+      // ---- 2-way crosstab ----
+      var rowKeys = groupKeys(gc, rows).filter(function (gk) { return rows.some(gk.test); }).slice(0, 30);
+      var colKeys = groupKeys(cc, rows).filter(function (gk) { return rows.some(gk.test); }).slice(0, 12);
+      var matrix = rowKeys.map(function (rk) {
+        var rrows = rows.filter(rk.test);
+        var cells = colKeys.map(function (ck) { var rs = rrows.filter(ck.test); return { v: cellVal(rs, vc), n: rs.length }; });
+        return { key: rk.key, cells: cells, total: cellVal(rrows, vc) || 0, n: rrows.length };
+      });
+      var colTotals = colKeys.map(function (ck) { var rs = rows.filter(ck.test); return cellVal(rs, vc) || 0; });
+
+      var t2 = el('table', 'dx-table');
+      var head = '<thead><tr><th>' + gc.label + ' \\ ' + cc.label + '</th>' + colKeys.map(function (ck) { return '<th class="num">' + ck.key + '</th>'; }).join('') + '<th class="num">Total</th></tr></thead>';
+      var body = '<tbody>' + matrix.map(function (mr) {
+        return '<tr><td><strong>' + mr.key + '</strong></td>' + mr.cells.map(function (c) { return '<td class="num">' + (c.n ? fmt(c.v) : '·') + '</td>'; }).join('') + '<td class="num"><strong>' + fmt(mr.total) + '</strong></td></tr>';
+      }).join('');
+      body += '<tr style="border-top:2px solid #DDE2E8"><td><strong>Total</strong></td>' + colTotals.map(function (v) { return '<td class="num"><strong>' + fmt(v) + '</strong></td>'; }).join('') + '<td class="num"><strong>' + fmt(cellVal(rows, vc)) + '</strong></td></tr></tbody>';
+      t2.innerHTML = head + body;
+      tableWrap.innerHTML = ''; tableWrap.appendChild(t2);
+
+      // stacked bar (count/sum only — additive)
       chartWrap.innerHTML = '';
-      var top = groups.slice(0, 14);
-      var W = chartWrap.clientWidth || 520, rowH = 26, H = Math.max(120, top.length * rowH + 30), M = { t: 10, r: 56, b: 10, l: 120 };
-      var iw = W - M.l - M.r;
-      var svg = d3.select(chartWrap).append('svg').attr('viewBox', '0 0 ' + W + ' ' + H);
-      var gg = svg.append('g').attr('transform', 'translate(' + M.l + ',' + M.t + ')');
-      var x = d3.scaleLinear().domain([0, d3.max(top, function (r) { return r.v; }) || 1]).range([0, iw]);
-      var y = d3.scaleBand().domain(top.map(function (r) { return r.key; })).range([0, H - M.t - M.b]).padding(.22);
-      gg.append('g').call(d3.axisLeft(y).tickSize(0)).selectAll('text').attr('font-size', 10).each(function () { var t2 = d3.select(this); var s = t2.text(); if (s.length > 16) t2.text(s.slice(0, 15) + '…'); });
-      gg.selectAll('rect').data(top).join('rect').attr('x', 0).attr('y', function (r) { return y(r.key); }).attr('height', y.bandwidth()).attr('width', function (r) { return x(r.v); }).attr('fill', '#1B5FAA').attr('fill-opacity', .85);
-      gg.selectAll('text.v').data(top).join('text').attr('class', 'v').attr('x', function (r) { return x(r.v) + 5; }).attr('y', function (r) { return y(r.key) + y.bandwidth() / 2 + 3.5; }).attr('font-size', 10).attr('fill', '#52606D').text(function (r) { return fmt(r.v); });
+      if (st.agg === 'count' || st.agg === 'sum') {
+        var W2 = chartWrap.clientWidth || 760, H2 = 320, M2 = { t: 12, r: 18, b: 80, l: 56 }, iw2 = W2 - M2.l - M2.r, ih2 = H2 - M2.t - M2.b;
+        var gg2 = d3.select(chartWrap).append('svg').attr('viewBox', '0 0 ' + W2 + ' ' + H2).append('g').attr('transform', 'translate(' + M2.l + ',' + M2.t + ')');
+        var stackData = matrix.map(function (mr) { var o = { key: mr.key }; colKeys.forEach(function (ck, i) { o[ck.key] = mr.cells[i].v || 0; }); return o; });
+        var series = d3.stack().keys(colKeys.map(function (ck) { return ck.key; }))(stackData);
+        var x2 = d3.scaleBand().domain(matrix.map(function (m) { return m.key; })).range([0, iw2]).padding(.2);
+        var y2 = d3.scaleLinear().domain([0, d3.max(matrix, function (m) { return m.total; }) || 1]).range([ih2, 0]).nice();
+        gg2.append('g').attr('transform', 'translate(0,' + ih2 + ')').call(d3.axisBottom(x2)).selectAll('text').attr('font-size', 9).attr('transform', 'rotate(-35)').attr('text-anchor', 'end');
+        gg2.append('g').call(d3.axisLeft(y2).ticks(6));
+        gg2.selectAll('g.s').data(series).join('g').attr('class', 's').attr('fill', function (s, i) { return palette[i % palette.length]; })
+          .selectAll('rect').data(function (s) { return s; }).join('rect').attr('x', function (dd) { return x2(dd.data.key); }).attr('y', function (dd) { return y2(dd[1]); }).attr('height', function (dd) { return Math.max(0, y2(dd[0]) - y2(dd[1])); }).attr('width', x2.bandwidth())
+          .append('title').text(function (dd) { return dd.data.key + ': ' + fmt(dd[1] - dd[0]); });
+        var lg = el('div', 'dx-legend'); colKeys.forEach(function (ck, i) { lg.appendChild(el('span', null, '<i style="background:' + palette[i % palette.length] + '"></i>' + ck.key)); }); chartWrap.appendChild(lg);
+      } else {
+        chartWrap.appendChild(el('div', 'dx-note', 'Stacked bar shown for Count/Sum; the crosstab table above holds the ' + st.agg + ' values.'));
+      }
 
-      // download pivot
-      var pcols = [{ key: 'group', label: gc.label, get: function (r) { return r.key; } }, { key: 'value', label: valLabel, get: function (r) { return r.v; } }, { key: 'n', label: 'n rows', get: function (r) { return r.n; } }];
-      dlRow.innerHTML = ''; var saved = { rows: groups }; var b = el('button', 'dx-btn primary', '↓ Download pivot CSV');
-      b.onclick = function () { download((cfg.filename || 'data') + '-pivot.csv', toCSV(pcols, groups), 'text/csv'); };
-      dlRow.appendChild(b);
+      // download crosstab
+      var xcols = [{ key: 'row', label: gc.label, get: function (r) { return r.key; } }].concat(colKeys.map(function (ck, i) { return { key: 'c' + i, label: String(ck.key), get: function (r) { return r.cells[i].v; } }; })).concat([{ key: 'total', label: 'Total', get: function (r) { return r.total; } }]);
+      dlRow.innerHTML = ''; var b2 = el('button', 'dx-btn primary', '↓ Download crosstab CSV'); b2.onclick = function () { download((cfg.filename || 'data') + '-crosstab.csv', toCSV(xcols, matrix), 'text/csv'); }; dlRow.appendChild(b2);
     }
-    render();
+    filterSubs.push(function () { renderFilterBar(fbar); render(); });
+    renderFilterBar(fbar); render();
   }
 
   /* ---------- shell ---------- */
   function open(config) {
     close();
-    cfg = config; COLS = config.columns || []; ROWS = config.rows || [];
+    cfg = config; COLS = config.columns || []; ROWS = config.rows || []; FILTERS = []; filterSubs = [];
     root = el('div', 'dx-overlay');
     var panel = el('div', 'dx-panel');
     var m = cfg.meta || {};
