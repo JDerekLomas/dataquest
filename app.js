@@ -1701,7 +1701,7 @@
     8: { ok: 'Exactly — no clear relationship, and that IS the finding.', no: 'Check the flat best-fit line: depth does not predict magnitude in this sample.' }
   };
 
-  var completed = {}, skipUnlocked = state.skips || {}, doneCount = 0;
+  var completed = {}, skipUnlocked = state.skips || {}, doneCount = 0, streak = 0;
 
   function updateProgress() {
     document.getElementById('progress-fill').style.width = (doneCount / 9 * 100) + '%';
@@ -1715,6 +1715,60 @@
     doneCount++;
     updateProgress();
     applyGates();
+  }
+
+  /* ---------- milestone celebrations ---------- */
+  var toastTimer = null;
+  function showToast(msg, tone) {
+    var toast = document.getElementById('celebrate-toast');
+    if (!toast) return;
+    toast.className = 'celebrate-toast tone-' + (tone || 'good');
+    toast.textContent = msg;
+    toast.hidden = false;
+    toast.classList.remove('show'); void toast.offsetWidth; toast.classList.add('show');  // restart anim
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () {
+      toast.classList.remove('show');
+      setTimeout(function () { toast.hidden = true; }, 350);
+    }, 2600);
+  }
+
+  function confettiBurst() {
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    var colors = ['#1B5FAA', '#E8704F', '#F5B57E', '#1E7D45', '#E2A33D', '#3B82C4'];
+    var wrap = document.createElement('div');
+    wrap.className = 'confetti-wrap';
+    for (var i = 0; i < 70; i++) {
+      var b = document.createElement('i');
+      b.className = 'confetti-bit';
+      b.style.left = (Math.random() * 100) + '%';
+      b.style.background = colors[i % colors.length];
+      b.style.animationDelay = (Math.random() * 0.3).toFixed(2) + 's';
+      b.style.animationDuration = (1.6 + Math.random() * 1.5).toFixed(2) + 's';
+      b.style.transform = 'rotate(' + Math.round(Math.random() * 360) + 'deg)';
+      wrap.appendChild(b);
+    }
+    document.body.appendChild(wrap);
+    setTimeout(function () { wrap.remove(); }, 3600);
+  }
+
+  // called only on a live (non-restored) completion; doneCount is already incremented
+  function celebrateStep(n, ok) {
+    var fill = document.getElementById('progress-fill');
+    if (fill) { fill.classList.remove('pulse'); void fill.offsetWidth; fill.classList.add('pulse'); }
+
+    if (ok && (n === 9 || doneCount === 9)) { showToast("Case closed — you mapped Earth's anger.", 'good'); confettiBurst(); return; }
+    if (!ok) { showToast('Answer revealed — Step ' + n + ' logged. Keep going.', 'muted'); return; }
+
+    var msg;
+    if (doneCount === 3) msg = 'Three down — the pattern is emerging.';
+    else if (doneCount === 5) msg = 'Past halfway — 4 to go.';
+    else if (doneCount === 7) msg = 'Almost there — just 2 to go.';
+    else {
+      msg = 'Step ' + n + ' complete';
+      if (streak >= 2) msg += ' · ' + streak + ' in a row';
+    }
+    showToast(msg, 'good');
   }
 
   function runEvidenceFx(n) {
@@ -1741,6 +1795,7 @@
     if (!silent) runEvidenceFx(n);
     setInst(n, FB[n][ok ? 'ok' : 'no'], ok ? 'success' : 'error');
     complete(n);
+    if (!silent) { if (ok) streak++; else streak = 0; celebrateStep(n, ok); }
   }
 
   function gradeRadio(n, btn) {
@@ -1772,6 +1827,7 @@
     setInst(5, 'Saved: ' + values.join(', ') + ' — good noticing. The dots pulse to salute you.', 'success');
     if (!silent) runEvidenceFx(5);
     complete(5);
+    if (!silent) { streak++; celebrateStep(5, true); }
   }
 
   function gradeTags(btn) {
@@ -1821,6 +1877,7 @@
     if (!silent) runEvidenceFx(9);
     if (!silent) { state.answers[9] = true; saveState(); }
     complete(9);
+    if (!silent) { streak++; celebrateStep(9, true); }
   }
 
   document.querySelectorAll('.check-btn').forEach(function (btn) {

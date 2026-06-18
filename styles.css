@@ -554,3 +554,37 @@ button { font-family: inherit; cursor: pointer; }
 }
 .review-actions button.secondary { background: #fff; color: var(--primary); }
 .review-saved { font-size: 11px; color: var(--success); min-height: 14px; }
+
+/* ---------- Milestone celebrations ---------- */
+.celebrate-toast {
+  position: fixed; top: 64px; left: 50%;
+  transform: translateX(-50%) translateY(-14px);
+  z-index: 105; padding: 10px 22px; border-radius: 999px;
+  font-size: 14px; font-weight: 600; color: #fff; white-space: nowrap;
+  background: var(--success); box-shadow: 0 8px 26px rgba(31,41,51,0.24);
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+.celebrate-toast[hidden] { display: none; }
+.celebrate-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+.celebrate-toast.tone-muted { background: var(--ink-soft); }
+
+.progress-fill.pulse { animation: progressPulse 0.75s ease; }
+@keyframes progressPulse {
+  0%   { box-shadow: 0 0 0 0 rgba(27,95,170,0.55); }
+  100% { box-shadow: 0 0 0 9px rgba(27,95,170,0); }
+}
+
+.confetti-wrap { position: fixed; inset: 0; pointer-events: none; z-index: 150; overflow: hidden; }
+.confetti-bit {
+  position: absolute; top: -16px; width: 8px; height: 14px; border-radius: 1px; opacity: 0;
+  animation-name: confettiFall; animation-timing-function: ease-in; animation-fill-mode: forwards;
+}
+@keyframes confettiFall {
+  0%   { opacity: 1; top: -16px; }
+  100% { opacity: 0; top: 100vh; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .celebrate-toast { transition: opacity 0.2s ease; }
+  .progress-fill.pulse { animation: none; }
+}
