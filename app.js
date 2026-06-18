@@ -1995,7 +1995,9 @@
     var F = firstLockedStep();
     for (var n = 1; n <= 9; n++) {
       var sec = document.getElementById('step-' + n);
-      if (sec) sec.classList.toggle('gate-hidden', !reviewMode && F !== 0 && n > F);
+      if (!sec) continue;
+      sec.classList.toggle('gate-hidden', !reviewMode && F !== 0 && n > F);   // steps beyond the peek: hidden
+      sec.classList.toggle('peek-veil', !reviewMode && F !== 0 && n === F);   // the next step: dissolves to white
     }
     var hideEnd = !reviewMode && !completed[9];
     var endSec = document.getElementById('lesson-end');
@@ -2011,8 +2013,10 @@
     if (F === 0) return Infinity;
     var sec = document.getElementById('step-' + F);
     if (!sec) return Infinity;
+    // stop with the next step's top around mid-screen: the current step's
+    // question + Check button sit clearly above it, the next step dissolves below
     var topDoc = sec.getBoundingClientRect().top + window.scrollY;
-    return Math.max(0, topDoc - window.innerHeight * 0.40);
+    return Math.max(0, topDoc - window.innerHeight * 0.52);
   }
 
   var clamping = false;
