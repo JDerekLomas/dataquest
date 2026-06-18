@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mapping the Ring of Fire — Savvas Data Show</title>
+<link rel="stylesheet" href="styles.css?v=13">
+</head>
+<body>
+
+<div class="intro-screen" id="intro-screen">
+  <div class="intro-inner">
+    <p class="intro-kicker">Savvas Data Show · Data literacy · Grades 9–11</p>
+    <h1 class="intro-title">Mapping the Ring of Fire</h1>
+    <p class="intro-lede">At 5:46 a.m. on January 17, 1995, the ground beneath Kobe, Japan ripped apart.
+    You'll start from that single point on a map and build the evidence — coordinates, geometric
+    patterns, and statistical graphs — to explain where earthquakes happen, and why.</p>
+    <p class="intro-meta">9 steps · about 15 minutes · narrated. Every dot is a <strong>real</strong>
+    USGS record — 800 M5.5+ events (2000–2025) plus the Kobe mainshock.</p>
+    <div class="intro-actions">
+      <button class="intro-begin" id="intro-begin">Begin the lesson ▶</button>
+      <label class="intro-sound"><input type="checkbox" id="intro-mute"> Start muted (no narration)</label>
+    </div>
+  </div>
+</div>
+
+<nav class="topnav">
+  <div class="nav-left">
+    <span class="brand">Savvas <strong>Data Show</strong></span>
+    <span class="crumb">Mapping the Ring of Fire · Kobe, 1995</span>
+  </div>
+  <div class="nav-progress" aria-label="Lesson progress">
+    <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
+    <span class="progress-label" id="progress-label">0 / 9 checks</span>
+  </div>
+  <div class="nav-right">
+    <button class="nav-btn" id="nav-sound">Sound: on</button>
+    <button class="nav-btn" id="nav-notes">Notes</button>
+    <button class="nav-btn" id="nav-data">Data</button>
+    <button class="nav-btn" id="nav-explore">Explore</button>
+  </div>
+</nav>
+
+<div class="notes-panel" id="notes-panel" hidden>
+  <div class="notes-head"><span>My notes</span><button class="panel-close" id="notes-close">×</button></div>
+  <textarea id="notes-text" placeholder="Jot observations here. Notes stay on this page only."></textarea>
+</div>
+
+<div class="data-modal" id="data-modal" hidden>
+  <div class="data-modal-inner">
+    <div class="notes-head"><span>The dataset (first 30 rows)</span><button class="panel-close" id="data-close">×</button></div>
+    <p class="data-note">Real records from the <strong>USGS earthquake catalog</strong>: a random sample of 800 M5.5+ events, 2000–2025, plus the 1995 Kobe mainshock.</p>
+    <div class="data-table-wrap"><table id="data-table"></table></div>
+  </div>
+</div>
+
+<header class="lesson-header">
+  <p class="kicker">Data literacy · Grades 9–11</p>
+  <h1>Mapping the Ring of Fire</h1>
+  <p class="lede">At 5:46 a.m. on January 17, 1995, the ground beneath Kobe, Japan ripped apart.
+  In this lesson you'll start from that single point on a map and build the evidence — coordinates,
+  geometric patterns, and statistical graphs — to explain where earthquakes happen and why.
+  Every earthquake dot is <strong>real</strong>: a random sample of 800 M5.5+ events (2000–2025)
+  from the USGS earthquake catalog, plus the 1995 Kobe mainshock itself.</p>
+</header>
+
+<main id="lesson">
+
+  <!-- ============ STEP 1 ============ -->
+  <section class="step" id="step-1" data-step="1">
+    <div class="step-inner">
+      <div class="viz-col">
+        <div class="viz-frame">
+          <div class="viz-container" id="viz-1" aria-label="Map of Japan with Kobe marked"></div>
+          <div class="viz-controls">
+            <button class="util-btn" data-util="zoom-in" title="Zoom in">+</button>
+            <button class="util-btn" data-util="zoom-out" title="Zoom out">−</button>
+            <button class="util-btn" data-util="reset" title="Reset view">⟲</button>
+          </div>
+        </div>
+        <div class="instruction-bar" id="inst-1">Find the labeled dot. That is Kobe — 135.19°E, 34.69°N.</div>
+      </div>
+      <div class="card-col">
+        <article class="story-card">
+          <div class="step-label">Step 1 of 9</div>
+          <h2>One morning in Kobe</h2>
+          <p>Before January 1995, Kobe was not considered Japan's highest-risk city. Then a magnitude-6.9
+          earthquake struck directly beneath it. On the map, Kobe is just one dot at one pair of coordinates —
+          but it sits close to a known boundary zone, and it isn't alone.</p>
+          <p>What spatial clues make this location worth investigating?</p>
+          <div class="chip-bar">
+            <span class="chip-bar-label">Explore ▸</span>
+            <button class="chip" data-chip="coordinates">Coordinates</button>
+            <button class="chip" data-chip="grid">Grid</button>
+            <button class="chip" data-chip="boundary">Boundary zone</button>
+            <button class="chip" data-chip="sample">Data source</button>
+          </div>
+          <div class="mcq" id="mcq-1">
+            <p class="mcq-q">Which spatial clue makes Kobe's location worth a closer look?</p>
+            <label class="mcq-choice"><input type="radio" name="mcq1" value="A"><span>Its coordinates tell us exactly where it is</span></label>
+            <label class="mcq-choice"><input type="radio" name="mcq1" value="B"><span>It sits near a boundary zone</span></label>
+            <label class="mcq-choice"><input type="radio" name="mcq1" value="C"><span>Many nearby dots hint at a pattern</span></label>
+            <label class="mcq-choice"><input type="radio" name="mcq1" value="D"><span>All of these together</span></label>
+            <button class="check-btn" data-check="1">Check my answer</button>
+            <div class="mcq-feedback" hidden></div>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ STEP 2 ============ -->
+  <section class="step" id="step-2" data-step="2">
+    <div class="step-inner">
+      <div class="viz-col">
+        <div class="viz-frame">
+          <div class="viz-container" id="viz-2" aria-label="Draggable globe centered on the western Pacific"></div>
+          <div class="viz-controls">
+            <button class="util-btn" data-util="reset" title="Reset view">⟲</button>
+          </div>
+        </div>
+        <div class="instruction-bar" id="inst-2">Drag the globe to spin it. Watch one point become a dataset.</div>
+      </div>
+      <div class="card-col">
+        <article class="story-card">
+          <div class="step-label">Step 2 of 9</div>
+          <h2>Zoom out: one point becomes a dataset</h2>
+          <p>A pair of coordinates locates a single point. But a single point can't tell you whether a place is
+          unusual or typical. To judge that, you need company — many measurements of the same kind, plotted in
+          the same space.</p>
+          <p>Here is Kobe again, on the whole planet, joined by 800 real earthquakes from the USGS catalog.</p>
+          <div class="chip-bar">
+            <span class="chip-bar-label">Explore ▸</span>
+            <button class="chip" data-chip="coordinates">Coordinates</button>
+            <button class="chip" data-chip="grid">Grid</button>
+            <button class="chip" data-chip="compare">Compare</button>
+            <button class="chip" data-chip="sample">Data source</button>
+          </div>
+          <div class="mcq" id="mcq-2">
+            <p class="mcq-q">What changes when one point becomes many?</p>
+            <label class="mcq-choice"><input type="radio" name="mcq2" value="A"><span>The map gets too crowded to read</span></label>
+            <label class="mcq-choice"><input type="radio" name="mcq2" value="B"><span>The pattern becomes easier to see</span></label>
+            <label class="mcq-choice"><input type="radio" name="mcq2" value="C"><span>Each individual point becomes less accurate</span></label>
+            <label class="mcq-choice"><input type="radio" name="mcq2" value="D"><span>Nothing — one point tells us just as much</span></label>
+            <button class="check-btn" data-check="2">Check my answer</button>
+            <div class="mcq-feedback" hidden></div>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ STEP 3 ============ -->
+  <section class="step" id="step-3" data-step="3">
+    <div class="step-inner">
+      <div class="viz-col">
+        <div class="viz-frame">
+          <div class="viz-container" id="viz-3" aria-label="World map with earthquake dots appearing"></div>
+          <div class="viz-controls">
+            <button class="util-btn" data-util="zoom-in" title="Zoom in">+</button>
+            <button class="util-btn" data-util="zoom-out" title="Zoom out">−</button>
+            <button class="util-btn" data-util="reset" title="Reset view">⟲</button>
+            <button class="util-btn util-layer" data-util="play" title="Replay 25 years in date order">▶ 25 yr</button>
+          </div>
+        </div>
+        <div class="instruction-bar" id="inst-3">Watch the dots arrive. Do they land everywhere — or somewhere?</div>
+      </div>
+      <div class="card-col">
+        <article class="story-card">
+          <div class="step-label">Step 3 of 9</div>
+          <h2>The reveal</h2>
+          <p>Here is the whole sample on a flat world map — 800 real earthquakes from 25 years of records.
+          If earthquakes struck at random, the dots would sprinkle evenly across the whole map — oceans,
+          continents, everywhere.</p>
+          <p>They don't. The dots gather into <strong>lines</strong>, <strong>arcs</strong>, and
+          <strong>clusters</strong>, tracing the edges of the Pacific. Geometry vocabulary suddenly becomes
+          data vocabulary.</p>
+          <div class="chip-bar">
+            <span class="chip-bar-label">Explore ▸</span>
+            <button class="chip" data-chip="pattern">Pattern path</button>
+            <button class="chip" data-chip="compare">Compare</button>
+            <button class="chip" data-chip="boundary">Boundary zones</button>
+            <button class="chip" data-chip="grid">Grid</button>
+          </div>
+          <div class="mcq" id="mcq-3">
+            <p class="mcq-q">What does the arrangement of dots reveal?</p>
+            <label class="mcq-choice"><input type="radio" name="mcq3" value="A"><span>Earthquakes scatter randomly across Earth</span></label>
+            <label class="mcq-choice"><input type="radio" name="mcq3" value="B"><span>The dots follow lines, arcs, and clusters along certain zones</span></label>
+            <label class="mcq-choice"><input type="radio" name="mcq3" value="C"><span>Earthquakes only happen near large cities</span></label>
+            <label class="mcq-choice"><input type="radio" name="mcq3" value="D"><span>The dots form an evenly spaced grid</span></label>
+            <button class="check-btn" data-check="3">Check my answer</button>
+            <div class="mcq-feedback" hidden></div>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ STEP 4 ============ -->
+  <section class="step" id="step-4" data-step="4">
+    <div class="step-inner">
+      <div class="viz-col">
+        <div class="viz-frame">
+          <div class="viz-container" id="viz-4" aria-label="World map with one dot expanded into a data card"></div>
+          <div class="viz-controls">
+            <button class="util-btn" data-util="zoom-in" title="Zoom in">+</button>
+            <button class="util-btn" data-util="zoom-out" title="Zoom out">−</button>
+            <button class="util-btn" data-util="reset" title="Reset view">⟲</button>
+          </div>
+        </div>
+        <div class="instruction-bar" id="inst-4">Every dot is a measurement. Open one up and read its fields.</div>
+      </div>
+      <div class="card-col">
+        <article class="story-card">
+          <div class="step-label">Step 4 of 9</div>
+          <div class="expert-tag"><span class="expert-avatar">MC</span><span><strong>Dr. Maya Chen</strong><br>Earthquake Data Scientist</span></div>
+          <h2>What a dot knows</h2>
+          <p>"When my team records an earthquake, we never store just a dot. Each event carries a
+          <strong>location</strong> (longitude, latitude), a <strong>magnitude</strong>, a <strong>depth</strong>
+          below the surface, and a <strong>time</strong>. The map shows you one slice of that record —
+          the other fields are waiting underneath."</p>
+          <p class="fine-print">Every value shown here is a real record from the USGS earthquake catalog.</p>
+          <div class="chip-bar">
+            <span class="chip-bar-label">Explore ▸</span>
+            <button class="chip" data-chip="coordinates">Coordinates</button>
+            <button class="chip" data-chip="magnitude">Magnitude</button>
+            <button class="chip" data-chip="depth">Depth groups</button>
+            <button class="chip" data-chip="sample">Data source</button>
+          </div>
+          <div class="mcq" id="mcq-4">
+            <p class="mcq-q">In this dataset, each dot encodes…</p>
+            <label class="mcq-choice"><input type="radio" name="mcq4" value="A"><span>Only a location</span></label>
+            <label class="mcq-choice"><input type="radio" name="mcq4" value="B"><span>Location, magnitude, depth, and time</span></label>
+            <label class="mcq-choice"><input type="radio" name="mcq4" value="C"><span>Only a magnitude</span></label>
+            <label class="mcq-choice"><input type="radio" name="mcq4" value="D"><span>The name of the nearest city</span></label>
+            <button class="check-btn" data-check="4">Check my answer</button>
+            <div class="mcq-feedback" hidden></div>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ STEP 5 ============ -->
+  <section class="step" id="step-5" data-step="5">
+    <div class="step-inner">
+      <div class="viz-col">
+        <div class="viz-frame">
+          <div class="viz-container" id="viz-5" aria-label="World map for free exploration"></div>
+          <div class="viz-controls">
+            <button class="util-btn" data-util="zoom-in" title="Zoom in">+</button>
+            <button class="util-btn" data-util="zoom-out" title="Zoom out">−</button>
+            <button class="util-btn" data-util="reset" title="Reset view">⟲</button>
+          </div>
+        </div>
+        <div class="instruction-bar" id="inst-5">Pan, zoom, hover. Explore freely — there is no wrong observation here.</div>
+      </div>
+      <div class="card-col">
+        <article class="story-card">
+          <div class="step-label">Step 5 of 9</div>
+          <h2>Notice &amp; wonder</h2>
+          <p>Scientists start with open eyes, not answers. Drag and zoom the map. Hover dots to read their
+          values. Then tag every geometric shape you can honestly say you see — several answers can be
+          true at once.</p>
+          <div class="chip-bar">
+            <span class="chip-bar-label">Explore ▸</span>
+            <button class="chip" data-chip="pattern">Pattern path</button>
+            <button class="chip" data-chip="compare">Compare</button>
+            <button class="chip" data-chip="grid">Grid</button>
+            <button class="chip" data-chip="boundary">Boundary zones</button>
+          </div>
+          <div class="mcq mcq-multi" id="mcq-5">
+            <p class="mcq-q">Which shapes do you see in the dots? Tag all that apply.</p>
+            <div class="tag-grid">
+              <label class="mcq-choice tag"><input type="checkbox" name="mcq5" value="line"><span>Line</span></label>
+              <label class="mcq-choice tag"><input type="checkbox" name="mcq5" value="curve"><span>Curve</span></label>
+              <label class="mcq-choice tag"><input type="checkbox" name="mcq5" value="arc"><span>Arc</span></label>
+              <label class="mcq-choice tag"><input type="checkbox" name="mcq5" value="band"><span>Band</span></label>
+              <label class="mcq-choice tag"><input type="checkbox" name="mcq5" value="cluster"><span>Cluster</span></label>
+              <label class="mcq-choice tag"><input type="checkbox" name="mcq5" value="scattered"><span>Scattered</span></label>
+            </div>
+            <button class="check-btn" data-check="5">Save my observations</button>
+            <div class="mcq-feedback" hidden></div>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ STEP 6 ============ -->
+  <section class="step" id="step-6" data-step="6">
+    <div class="step-inner">
+      <div class="viz-col">
+        <div class="viz-frame">
+          <div class="viz-container" id="viz-6" aria-label="World map with magnitude filter"></div>
+          <div class="viz-controls">
+            <button class="util-btn" data-util="zoom-in" title="Zoom in">+</button>
+            <button class="util-btn" data-util="zoom-out" title="Zoom out">−</button>
+            <button class="util-btn" data-util="reset" title="Reset view">⟲</button>
+            <button class="util-btn util-layer" data-util="layer" title="Toggle Ring of Fire overlay">Ring</button>
+          </div>
+        </div>
+        <div class="slider-row">
+          <label for="mag-slider">Show quakes ≥ <strong id="mag-readout">M6.0</strong></label>
+          <input type="range" id="mag-slider" min="6" max="8.5" step="0.1" value="6">
+          <span class="slider-count" id="mag-count"></span>
+        </div>
+        <div class="instruction-bar" id="inst-6">Slide the magnitude filter. Watch which dots survive — and where they live.</div>
+      </div>
+      <div class="card-col">
+        <article class="story-card">
+          <div class="step-label">Step 6 of 9</div>
+          <h2>Filter to sharpen the pattern</h2>
+          <p>Grouping data by a variable — here, magnitude — is one of the most powerful moves in data analysis.
+          As you raise the cutoff, weaker quakes drop away. The dots that remain are not scattered survivors:
+          they hug the same path.</p>
+          <p>Toggle the Ring overlay to compare the surviving dots against the boundary path.</p>
+          <div class="chip-bar">
+            <span class="chip-bar-label">Explore ▸</span>
+            <button class="chip" data-chip="bins">Magnitude bins</button>
+            <button class="chip" data-chip="frequency">Frequency</button>
+            <button class="chip" data-chip="pattern">Pattern path</button>
+            <button class="chip" data-chip="compare">Compare</button>
+          </div>
+          <div class="mcq" id="mcq-6">
+            <p class="mcq-q"><span class="evidence-flag">Visual evidence check</span> Set the slider to M7.0 or higher, then answer: what happens to the pattern?</p>
+            <label class="mcq-choice"><input type="radio" name="mcq6" value="A"><span>It disappears completely</span></label>
+            <label class="mcq-choice"><input type="radio" name="mcq6" value="B"><span>The band along the Pacific edge stands out even more clearly</span></label>
+            <label class="mcq-choice"><input type="radio" name="mcq6" value="C"><span>The remaining dots spread out at random</span></label>
+            <label class="mcq-choice"><input type="radio" name="mcq6" value="D"><span>Nothing changes</span></label>
+            <button class="check-btn" data-check="6">Check evidence</button>
+            <div class="mcq-feedback" hidden></div>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ STEP 7 ============ -->
+  <section class="step" id="step-7" data-step="7">
+    <div class="step-inner">
+      <div class="viz-col">
+        <div class="viz-frame">
+          <div class="viz-container" id="viz-7" aria-label="Histogram of earthquake magnitudes"></div>
+        </div>
+        <div class="instruction-bar" id="inst-7">Read the histogram left to right. Where do the bars tower — and where do they shrink?</div>
+      </div>
+      <div class="card-col">
+        <article class="story-card">
+          <div class="step-label">Step 7 of 9</div>
+          <h2>The distribution lens</h2>
+          <p>Leave the map for a moment. Count how many quakes fall in each magnitude bin and stack them into a
+          histogram. The shape that appears has a name: a <strong>long right tail</strong>. Small quakes are
+          everyday events; giants are vanishingly rare — but they exist, far out on the right.</p>
+          <div class="chip-bar">
+            <span class="chip-bar-label">Explore ▸</span>
+            <button class="chip" data-chip="axes">Axes</button>
+            <button class="chip" data-chip="bars">Bars</button>
+            <button class="chip" data-chip="tail">Right tail</button>
+            <button class="chip" data-chip="frequency">Frequency</button>
+          </div>
+          <div class="mcq" id="mcq-7">
+            <p class="mcq-q">What does the long right tail tell us?</p>
+            <label class="mcq-choice"><input type="radio" name="mcq7" value="A"><span>High-magnitude quakes are common</span></label>
+            <label class="mcq-choice"><input type="radio" name="mcq7" value="B"><span>High-magnitude quakes are rare</span></label>
+            <label class="mcq-choice"><input type="radio" name="mcq7" value="C"><span>Most quakes are magnitude 8 or higher</span></label>
+            <label class="mcq-choice"><input type="radio" name="mcq7" value="D"><span>Magnitudes are spread evenly across all bins</span></label>
+            <button class="check-btn" data-check="7">Check my answer</button>
+            <div class="mcq-feedback" hidden></div>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ STEP 8 ============ -->
+  <section class="step" id="step-8" data-step="8">
+    <div class="step-inner">
+      <div class="viz-col">
+        <div class="viz-frame">
+          <div class="viz-container" id="viz-8" aria-label="Scatter plot of depth versus magnitude"></div>
+        </div>
+        <div class="instruction-bar" id="inst-8">Each dot is one quake: depth across, magnitude up. Hunt for a trend — honestly.</div>
+      </div>
+      <div class="card-col">
+        <article class="story-card">
+          <div class="step-label">Step 8 of 9</div>
+          <h2>Are deeper earthquakes stronger?</h2>
+          <p>It sounds plausible: deeper rupture, bigger quake. A scatter plot lets the data answer. If depth
+          drove magnitude, the cloud of dots would climb as you read rightward.</p>
+          <p>Look carefully. In this real USGS sample the cloud stays flat — shallow, intermediate, and deep
+          quakes all span the same range of magnitudes. <strong>Finding no clear relationship is a real
+          finding</strong>, and an important one.</p>
+          <div class="chip-bar">
+            <span class="chip-bar-label">Explore ▸</span>
+            <button class="chip" data-chip="axes">Axes</button>
+            <button class="chip" data-chip="depth">Depth groups</button>
+            <button class="chip" data-chip="trend">Trend guide</button>
+            <button class="chip" data-chip="compare">Compare</button>
+          </div>
+          <div class="mcq" id="mcq-8">
+            <p class="mcq-q">Based on this scatter plot, are deeper earthquakes stronger?</p>
+            <label class="mcq-choice"><input type="radio" name="mcq8" value="A"><span>Yes — there is a clear positive trend</span></label>
+            <label class="mcq-choice"><input type="radio" name="mcq8" value="B"><span>No — deeper quakes are clearly weaker</span></label>
+            <label class="mcq-choice"><input type="radio" name="mcq8" value="C"><span>This scatter plot shows no clear relationship between depth and magnitude</span></label>
+            <label class="mcq-choice"><input type="radio" name="mcq8" value="D"><span>Only shallow quakes can be strong</span></label>
+            <button class="check-btn" data-check="8">Check my answer</button>
+            <div class="mcq-feedback" hidden></div>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ STEP 9 ============ -->
+  <section class="step" id="step-9" data-step="9">
+    <div class="step-inner">
+      <div class="viz-col">
+        <div class="viz-frame">
+          <div class="viz-container" id="viz-9" aria-label="World map with the Ring of Fire highlighted"></div>
+          <div class="viz-controls">
+            <button class="util-btn" data-util="zoom-in" title="Zoom in">+</button>
+            <button class="util-btn" data-util="zoom-out" title="Zoom out">−</button>
+            <button class="util-btn" data-util="reset" title="Reset view">⟲</button>
+            <button class="util-btn util-layer" data-util="layer" title="Toggle Ring of Fire overlay">Ring</button>
+            <button class="util-btn util-layer" data-util="live" title="Show real quakes from the past 7 days (USGS live feed)">Live</button>
+          </div>
+        </div>
+        <div class="instruction-bar" id="inst-9">The path has a name. Use the map as evidence for your claim.</div>
+      </div>
+      <div class="card-col">
+        <article class="story-card">
+          <div class="step-label">Step 9 of 9</div>
+          <h2>Name the finding: the Pacific Ring of Fire</h2>
+          <p>The band your dots traced is the <strong>Pacific Ring of Fire</strong> — the chain of boundary
+          zones wrapping the Pacific Ocean. In this USGS sample, most M6+ dots cluster along this path,
+          and Kobe sits on its western edge.</p>
+          <p>Now make it yours. Write a claim that uses <strong>one geometry term</strong> (band, arc, line,
+          cluster…) and <strong>one number or pattern observation</strong> (a count, a magnitude, "most",
+          "rare"…).</p>
+          <div class="chip-bar">
+            <span class="chip-bar-label">Explore ▸</span>
+            <button class="chip" data-chip="pattern">Pattern path</button>
+            <button class="chip" data-chip="bins">Magnitude bins</button>
+            <button class="chip" data-chip="frequency">Frequency</button>
+            <button class="chip" data-chip="boundary">Boundary zones</button>
+          </div>
+          <div class="mcq" id="mcq-9">
+            <p class="mcq-q"><span class="evidence-flag">Visual evidence check</span> Your claim:</p>
+            <textarea id="claim-text" rows="4" placeholder="Example shape: “Most M6+ earthquakes in this sample form a band along the Pacific edge — use the Frequency chip to get the exact count for your claim.”"></textarea>
+            <div class="claim-hints">
+              <span class="hint-pill" data-hint="band">band</span>
+              <span class="hint-pill" data-hint="arc">arc</span>
+              <span class="hint-pill" data-hint="cluster">cluster</span>
+              <span class="hint-pill" data-hint="line">line</span>
+            </div>
+            <button class="check-btn" data-check="9">Check evidence</button>
+            <div class="mcq-feedback" hidden></div>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<section class="lesson-end" id="lesson-end">
+  <p class="end-kicker">Lesson complete</p>
+  <h2>You mapped the Ring of Fire.</h2>
+  <p>You started from one dot at one pair of coordinates and built a full evidence chain — the same
+  moves a working data scientist makes.</p>
+  <ul class="end-recap">
+    <li>A single point became a <strong>dataset</strong> of 800 real USGS earthquakes.</li>
+    <li>The dots weren't random — they traced <strong>lines, arcs, and clusters</strong> along the Pacific edge.</li>
+    <li>Every dot carries <strong>location, magnitude, depth, and time</strong>.</li>
+    <li><strong>Filtering</strong> by magnitude sharpened the pattern instead of erasing it.</li>
+    <li>A histogram revealed a <strong>long right tail</strong>: big quakes are rare but real.</li>
+    <li>A scatter plot showed <strong>no clear link</strong> between depth and magnitude — a real finding.</li>
+    <li>The pattern has a name: the <strong>Pacific Ring of Fire</strong>, and Kobe sits on its western edge.</li>
+  </ul>
+  <div class="end-claim" id="end-claim" hidden>
+    <div class="end-claim-label">Your evidence-based claim</div>
+    <blockquote id="end-claim-text"></blockquote>
+  </div>
+  <div class="end-actions">
+    <button class="end-btn secondary" id="end-top">Back to the top</button>
+    <button class="end-btn" id="end-restart">Start over</button>
+  </div>
+</section>
+
+<footer class="lesson-footer">
+  <p>Savvas Data Show · classroom prototype · earthquake data: USGS earthquake catalog — random sample of 800 M5.5+ events (2000–2025) + the 1995 Kobe mainshock. Part of the <a href="../" style="color:#1B5FAA">Data Show series</a> · <a href="../cholera/" style="color:#1B5FAA">The Broad Street Pump (cholera, 1854)</a> · <a href="../exoplanets/" style="color:#1B5FAA">Are We Alone? (exoplanets)</a> · <a href="../climate/" style="color:#1B5FAA">The Breathing Planet (CO₂) →</a>.</p>
+</footer>
+
+<div class="map-tooltip" id="map-tooltip" hidden></div>
+
+<div class="celebrate-toast" id="celebrate-toast" hidden></div>
+
+<div class="scroll-fade" id="scroll-fade" aria-hidden="true">
+  <div class="scroll-cue"><span>⌄</span>scroll</div>
+</div>
+
+<div id="audio-rack" hidden>
+  <audio id="audio-1" src="assets/audio/step1.mp3" preload="none"></audio>
+  <audio id="audio-2" src="assets/audio/step2.mp3" preload="none"></audio>
+  <audio id="audio-3" src="assets/audio/step3.mp3" preload="none"></audio>
+  <audio id="audio-4" src="assets/audio/step4.mp3" preload="none"></audio>
+  <audio id="audio-5" src="assets/audio/step5.mp3" preload="none"></audio>
+  <audio id="audio-6" src="assets/audio/step6.mp3" preload="none"></audio>
+  <audio id="audio-7" src="assets/audio/step7.mp3" preload="none"></audio>
+  <audio id="audio-8" src="assets/audio/step8.mp3" preload="none"></audio>
+  <audio id="audio-9" src="assets/audio/step9.mp3" preload="none"></audio>
+</div>
+
+<script src="vendor/d3.v7.min.js"></script>
+<script src="vendor/topojson-client.min.js"></script>
+<script src="data/land-110m.js"></script>
+<script src="data/land-50m.js"></script>
+<script src="data/plates.js"></script>
+<script src="data/quakes.js"></script>
+<script src="app.js?v=12"></script>
+</body>
+</html>
