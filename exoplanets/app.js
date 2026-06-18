@@ -449,19 +449,33 @@
   var notesPanel = document.getElementById('notes-panel');
   document.getElementById('nav-notes').addEventListener('click', function () { notesPanel.hidden = !notesPanel.hidden; });
   document.getElementById('notes-close').addEventListener('click', function () { notesPanel.hidden = true; });
-  var dataModal = document.getElementById('data-modal');
-  document.getElementById('nav-data').addEventListener('click', function () {
-    var table = document.getElementById('data-table');
-    if (!table.innerHTML) {
-      var sample = CAT.slice().sort(function (a, b) { return a.ins - b.ins; }).slice(0, 30);
-      var rows = sample.map(function (p) { return '<tr><td>' + p.n + '</td><td>' + p.r + '</td><td>' + (p.m != null ? p.m : '—') + '</td><td>' + (p.ins >= 10 ? Math.round(p.ins) : p.ins) + '</td><td>' + (p.au != null ? p.au : '—') + '</td><td>' + (p.meth || '—') + '</td><td>' + (p.yr || '—') + '</td></tr>'; }).join('');
-      table.innerHTML = '<thead><tr><th>Planet</th><th>R⊕</th><th>M⊕</th><th>Starlight</th><th>AU</th><th>Method</th><th>Year</th></tr></thead><tbody>' + rows + '</tbody>' +
-        '<caption style="caption-side:bottom;text-align:left;padding:10px 2px;font-size:12px;color:#5A6470">30 lowest-insolation planets shown. Real data — <a href="' + SRC_URL + '" target="_blank" rel="noopener" style="color:#1B5FAA">NASA Exoplanet Archive (pscomppars)</a>. ' + ALL.length.toLocaleString() + ' planets total.</caption>';
-    }
-    dataModal.hidden = false;
-  });
-  document.getElementById('data-close').addEventListener('click', function () { dataModal.hidden = true; });
-  dataModal.addEventListener('click', function (ev) { if (ev.target === dataModal) dataModal.hidden = true; });
+  var EXO_DX = {
+    title: 'NASA Exoplanet Archive — Confirmed Planets',
+    filename: 'exoplanets',
+    meta: {
+      source: 'NASA Exoplanet Archive (pscomppars)', url: SRC_URL,
+      fetched: window.EXO_DATA.generated, license: 'Public domain (NASA / Caltech-IPAC)',
+      description: 'One composite row per confirmed exoplanet, combining the best-available measurements. This lesson keeps every planet with a measured radius (' + ALL.length.toLocaleString() + ' planets). Blank cells were never measured for that planet.'
+    },
+    rows: ALL,
+    columns: [
+      { key: 'n', label: 'Planet', type: 'category', desc: 'Planet name' },
+      { key: 'r', label: 'Radius', type: 'number', unit: 'R⊕', desc: 'Planet radius in Earth radii' },
+      { key: 'm', label: 'Mass', type: 'number', unit: 'M⊕', desc: 'Planet mass in Earth masses' },
+      { key: 'ins', label: 'Starlight', type: 'number', unit: '×Earth', desc: 'Insolation flux received vs Earth' },
+      { key: 'au', label: 'Orbital distance', type: 'number', unit: 'AU', desc: 'Semi-major axis' },
+      { key: 'per', label: 'Orbital period', type: 'number', unit: 'days' },
+      { key: 'eqt', label: 'Equilib. temp', type: 'number', unit: 'K', desc: 'Planet equilibrium temperature' },
+      { key: 'teff', label: 'Star temp', type: 'number', unit: 'K', desc: 'Host-star effective temperature' },
+      { key: 'dist', label: 'Distance', type: 'number', unit: 'pc', desc: 'Distance from Earth in parsecs' },
+      { key: 'sizeClass', label: 'Size class', type: 'category', desc: 'Binned by radius', get: function (p) { var r = p.r; return r == null ? '(none)' : r < 1.6 ? 'Earth-size' : r < 4 ? 'super-Earth / sub-Neptune' : r < 10 ? 'Neptune-size' : 'Jupiter-size'; } },
+      { key: 'earthLike', label: 'Earth-like box', type: 'category', desc: 'Rocky size + habitable starlight', get: function (p) { return (p.r >= 0.5 && p.r <= 1.6 && p.ins != null && p.ins >= 0.25 && p.ins <= 1.5) ? 'in box' : 'outside'; } },
+      { key: 'meth', label: 'Discovery method', type: 'category' },
+      { key: 'yr', label: 'Discovery year', type: 'number' }
+    ],
+    defaults: { chart: { type: 'scatter', x: 'ins', y: 'r', color: 'meth' }, pivot: { group: 'meth', value: 'r', agg: 'count' } }
+  };
+  document.getElementById('nav-data').addEventListener('click', function () { window.DataExplorer.open(EXO_DX); });
   document.getElementById('nav-explore').addEventListener('click', function () { document.getElementById('step-5').scrollIntoView({ behavior: 'smooth', block: 'start' }); });
   window.LESSON = { ALL: ALL, CAT: CAT, BOX_PLANETS: BOX_PLANETS, BOX_N: BOX_N, ctxs: ctxs, COL: COL };
 

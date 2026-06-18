@@ -352,19 +352,27 @@
   var notesPanel = document.getElementById('notes-panel');
   document.getElementById('nav-notes').addEventListener('click', function () { notesPanel.hidden = !notesPanel.hidden; });
   document.getElementById('notes-close').addEventListener('click', function () { notesPanel.hidden = true; });
-  var dataModal = document.getElementById('data-modal');
-  document.getElementById('nav-data').addEventListener('click', function () {
-    var table = document.getElementById('data-table');
-    if (!table.innerHTML) {
-      var sample = DATA.filter(function (d, i) { return i % Math.ceil(DATA.length / 28) === 0; });
-      var rows = sample.map(function (d) { return '<tr><td>' + monthName(d.t) + ' ' + Math.floor(d.t) + '</td><td>' + d.a.toFixed(2) + '</td><td>' + (d.d != null ? d.d.toFixed(2) : '—') + '</td></tr>'; }).join('');
-      table.innerHTML = '<thead><tr><th>Month</th><th>CO₂ (ppm)</th><th>Trend (ppm)</th></tr></thead><tbody>' + rows + '</tbody>' +
-        '<caption style="caption-side:bottom;text-align:left;padding:10px 2px;font-size:12px;color:#5A6470">Every ~28th month shown. Real data — <a href="' + SRC_URL + '" target="_blank" rel="noopener" style="color:#1B5FAA">NOAA Mauna Loa monthly mean CO₂</a>. ' + DATA.length + ' months total.</caption>';
-    }
-    dataModal.hidden = false;
-  });
-  document.getElementById('data-close').addEventListener('click', function () { dataModal.hidden = true; });
-  dataModal.addEventListener('click', function (ev) { if (ev.target === dataModal) dataModal.hidden = true; });
+  var CLI_DX = {
+    title: 'NOAA Mauna Loa — Monthly Mean CO₂ (the Keeling Curve)',
+    filename: 'keeling-curve',
+    meta: {
+      source: 'NOAA Global Monitoring Laboratory', url: SRC_URL,
+      fetched: window.CO2_DATA.generated, license: 'Public domain (NOAA GML)',
+      description: 'Monthly mean atmospheric CO₂ measured at the Mauna Loa Observatory, Hawaii, from March 1958 to today — ' + DATA.length + ' months. “Trend” is the seasonally-adjusted value; it is blank for early months with too few daily measurements.'
+    },
+    rows: DATA,
+    columns: [
+      { key: 'year', label: 'Year', type: 'number', get: function (d) { return Math.floor(d.t); } },
+      { key: 'month', label: 'Month', type: 'category', get: function (d) { return monthName(d.t); }, groupable: true },
+      { key: 'decade', label: 'Decade', type: 'category', get: function (d) { return Math.floor(d.t / 10) * 10 + 's'; } },
+      { key: 't', label: 'Decimal year', type: 'number', desc: 'Year as a decimal' },
+      { key: 'a', label: 'CO₂', type: 'number', unit: 'ppm', desc: 'Monthly mean CO₂ concentration' },
+      { key: 'd', label: 'Trend', type: 'number', unit: 'ppm', desc: 'Seasonally-adjusted (deseasonalized) value' },
+      { key: 'seasonal', label: 'Seasonal part', type: 'number', unit: 'ppm', desc: 'Monthly mean minus the trend', get: function (d) { return d.d != null ? +(d.a - d.d).toFixed(2) : null; } }
+    ],
+    defaults: { chart: { type: 'line', x: 't', y: 'a' }, pivot: { group: 'decade', value: 'a', agg: 'mean' } }
+  };
+  document.getElementById('nav-data').addEventListener('click', function () { window.DataExplorer.open(CLI_DX); });
   document.getElementById('nav-explore').addEventListener('click', function () { document.getElementById('step-5').scrollIntoView({ behavior: 'smooth', block: 'start' }); });
   window.LESSON = { DATA: DATA, DECADES: DECADES, MILES: MILES, RISE: RISE, SEAS_AMP: SEAS_AMP, ctxs: ctxs, COL: COL };
 

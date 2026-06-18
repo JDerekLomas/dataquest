@@ -561,20 +561,25 @@
   document.getElementById('nav-notes').addEventListener('click', function () { notesPanel.hidden = !notesPanel.hidden; });
   document.getElementById('notes-close').addEventListener('click', function () { notesPanel.hidden = true; });
 
-  var dataModal = document.getElementById('data-modal');
-  document.getElementById('nav-data').addEventListener('click', function () {
-    var table = document.getElementById('data-table');
-    if (!table.innerHTML) {
-      var rows = DEATHS.slice(0, 30).map(function (d, i) {
-        return '<tr><td>' + (i + 1) + '</td><td>death</td><td>' + d.x.toFixed(3) + '</td><td>' + d.y.toFixed(3) + '</td><td>' + d.np.name + '</td><td>' + d.dBroad.toFixed(2) + '</td></tr>';
-      }).join('');
-      table.innerHTML = '<thead><tr><th>#</th><th>Record</th><th>x</th><th>y</th><th>Nearest pump</th><th>Dist→Broad</th></tr></thead><tbody>' + rows + '</tbody>' +
-        '<caption style="caption-side:bottom;text-align:left;padding:10px 2px;font-size:12px;color:#5A6470">Real data — Snow 1854, HistData. Full source: <a href="' + SRC_URL + '" target="_blank" rel="noopener" style="color:#1B5FAA">Snow.deaths / Snow.pumps / Snow.streets (Rdatasets)</a>.</caption>';
-    }
-    dataModal.hidden = false;
-  });
-  document.getElementById('data-close').addEventListener('click', function () { dataModal.hidden = true; });
-  dataModal.addEventListener('click', function (ev) { if (ev.target === dataModal) dataModal.hidden = true; });
+  var CH_DX = {
+    title: 'John Snow 1854 — Soho Cholera Deaths',
+    filename: 'snow-cholera',
+    meta: {
+      source: 'HistData (Snow.deaths) via Rdatasets', url: SRC_URL,
+      fetched: '2026-06-18', license: 'Open — digitized from Snow’s map by Dodson & Tobler (HistData)',
+      description: DEATHS.length + ' cholera death locations from Dr. John Snow’s 1854 Soho survey, on the Dodson–Tobler coordinate grid, plus the 13 neighborhood pumps. The nearest-pump and distance columns are computed from the real coordinates. Tip: a Scatter of x vs y redraws Snow’s map; color it by nearest pump.'
+    },
+    rows: DEATHS,
+    columns: [
+      { key: 'x', label: 'x', type: 'number', desc: 'Dodson–Tobler grid x (east)' },
+      { key: 'y', label: 'y', type: 'number', desc: 'Dodson–Tobler grid y (north)' },
+      { key: 'nearestPump', label: 'Nearest pump', type: 'category', get: function (d) { return d.np.name; }, desc: 'Closest of the 13 pumps' },
+      { key: 'distBroad', label: 'Distance to Broad St pump', type: 'number', unit: 'grid', get: function (d) { return +d.dBroad.toFixed(3); } },
+      { key: 'broadBand', label: 'Proximity to Broad St', type: 'category', get: function (d) { return d.dBroad < 1 ? '< 1 unit' : d.dBroad < 2 ? '1–2' : d.dBroad < 3 ? '2–3' : d.dBroad < 4 ? '3–4' : '4+ units'; } }
+    ],
+    defaults: { chart: { type: 'scatter', x: 'x', y: 'y', color: 'nearestPump' }, pivot: { group: 'nearestPump', value: 'distBroad', agg: 'count' } }
+  };
+  document.getElementById('nav-data').addEventListener('click', function () { window.DataExplorer.open(CH_DX); });
   document.getElementById('nav-explore').addEventListener('click', function () { document.getElementById('step-5').scrollIntoView({ behavior: 'smooth', block: 'start' }); });
 
   window.LESSON = { DEATHS: DEATHS, PUMPS: PUMPS, BY_PUMP: BY_PUMP, BROAD_N: BROAD_N, DIST_BINS: DIST_BINS, ctxs: ctxs, COL: COL };

@@ -1633,20 +1633,29 @@
   });
   document.getElementById('notes-close').addEventListener('click', function () { notesPanel.hidden = true; });
 
-  var dataModal = document.getElementById('data-modal');
-  document.getElementById('nav-data').addEventListener('click', function () {
-    var table = document.getElementById('data-table');
-    if (!table.innerHTML) {
-      var rows = QUAKES.slice(0, 30).map(function (d) {
-        return '<tr><td>' + d.id + '</td><td>' + (d.place || '—') + '</td><td>' + d.lon.toFixed(2) + '</td><td>' + d.lat.toFixed(2) +
-          '</td><td>M' + d.mag.toFixed(1) + '</td><td>' + d.depth + ' km</td><td>' + d.date + '</td></tr>';
-      }).join('');
-      table.innerHTML = '<thead><tr><th>#</th><th>Place (USGS)</th><th>Lon</th><th>Lat</th><th>Mag</th><th>Depth</th><th>Date</th></tr></thead><tbody>' + rows + '</tbody>';
-    }
-    dataModal.hidden = false;
-  });
-  document.getElementById('data-close').addEventListener('click', function () { dataModal.hidden = true; });
-  dataModal.addEventListener('click', function (ev) { if (ev.target === dataModal) dataModal.hidden = true; });
+  var EQ_DX = {
+    title: 'USGS Earthquake Catalog — M5.5+ sample',
+    filename: 'earthquakes',
+    meta: {
+      source: 'USGS Earthquake Catalog (FDSN)', url: 'https://earthquake.usgs.gov/earthquakes/search/',
+      fetched: '2026-06-10', license: 'Public domain (U.S. Geological Survey)',
+      description: 'A seeded random sample of ' + QUAKES.length + ' real M5.5+ earthquakes (2000–2025) from the USGS catalog, plus the 1995 Kobe mainshock. Every row is a real recorded event.'
+    },
+    rows: QUAKES,
+    columns: [
+      { key: 'place', label: 'Place', type: 'category', desc: 'USGS place description' },
+      { key: 'mag', label: 'Magnitude', type: 'number', unit: 'M', desc: 'Moment magnitude' },
+      { key: 'depth', label: 'Depth', type: 'number', unit: 'km', desc: 'Hypocenter depth below surface' },
+      { key: 'depthBand', label: 'Depth band', type: 'category', desc: 'Shallow <70, intermediate 70–300, deep >300 km', get: function (d) { return d.depth < 70 ? 'shallow' : d.depth < 300 ? 'intermediate' : 'deep'; } },
+      { key: 'region', label: 'Region', type: 'category', desc: 'On the Pacific Ring of Fire or elsewhere', get: function (d) { return d.src === 'ring' ? 'Ring of Fire' : 'elsewhere'; } },
+      { key: 'lon', label: 'Longitude', type: 'number', unit: '°' },
+      { key: 'lat', label: 'Latitude', type: 'number', unit: '°' },
+      { key: 'year', label: 'Year', type: 'number', get: function (d) { return d.date ? +String(d.date).slice(0, 4) : null; } },
+      { key: 'date', label: 'Date', type: 'category' }
+    ],
+    defaults: { chart: { type: 'scatter', x: 'depth', y: 'mag', color: 'region' }, pivot: { group: 'region', value: 'mag', agg: 'count' } }
+  };
+  document.getElementById('nav-data').addEventListener('click', function () { window.DataExplorer.open(EQ_DX); });
 
   document.getElementById('nav-explore').addEventListener('click', function () {
     document.getElementById('step-5').scrollIntoView({ behavior: 'smooth', block: 'start' });
