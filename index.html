@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Map Earth's Anger — Savvas Data Show</title>
-<link rel="stylesheet" href="styles.css?v=5">
+<link rel="stylesheet" href="styles.css?v=6">
 </head>
 <body>
 
@@ -89,7 +89,7 @@
           but it sits close to a known boundary zone, and it isn't alone.</p>
           <p>What spatial clues make this location worth investigating?</p>
           <div class="chip-bar">
-            <span class="chip-bar-label">Data &amp; Geometry</span>
+            <span class="chip-bar-label">Explore ▸</span>
             <button class="chip" data-chip="coordinates">Coordinates</button>
             <button class="chip" data-chip="grid">Grid</button>
             <button class="chip" data-chip="boundary">Boundary zone</button>
@@ -130,7 +130,7 @@
           the same space.</p>
           <p>Here is Kobe again, on the whole planet, joined by 800 real earthquakes from the USGS catalog.</p>
           <div class="chip-bar">
-            <span class="chip-bar-label">Data &amp; Geometry</span>
+            <span class="chip-bar-label">Explore ▸</span>
             <button class="chip" data-chip="coordinates">Coordinates</button>
             <button class="chip" data-chip="grid">Grid</button>
             <button class="chip" data-chip="compare">Compare</button>
@@ -176,7 +176,7 @@
           <strong>clusters</strong>, tracing the edges of the Pacific. Geometry vocabulary suddenly becomes
           data vocabulary.</p>
           <div class="chip-bar">
-            <span class="chip-bar-label">Data &amp; Geometry</span>
+            <span class="chip-bar-label">Explore ▸</span>
             <button class="chip" data-chip="pattern">Pattern path</button>
             <button class="chip" data-chip="compare">Compare</button>
             <button class="chip" data-chip="boundary">Boundary zones</button>
@@ -221,7 +221,7 @@
           the other fields are waiting underneath."</p>
           <p class="fine-print">Every value shown here is a real record from the USGS earthquake catalog.</p>
           <div class="chip-bar">
-            <span class="chip-bar-label">Data &amp; Geometry</span>
+            <span class="chip-bar-label">Explore ▸</span>
             <button class="chip" data-chip="coordinates">Coordinates</button>
             <button class="chip" data-chip="magnitude">Magnitude</button>
             <button class="chip" data-chip="depth">Depth groups</button>
@@ -263,7 +263,7 @@
           values. Then tag every geometric shape you can honestly say you see — several answers can be
           true at once.</p>
           <div class="chip-bar">
-            <span class="chip-bar-label">Data &amp; Geometry</span>
+            <span class="chip-bar-label">Explore ▸</span>
             <button class="chip" data-chip="pattern">Pattern path</button>
             <button class="chip" data-chip="compare">Compare</button>
             <button class="chip" data-chip="grid">Grid</button>
@@ -316,7 +316,7 @@
           they hug the same path.</p>
           <p>Toggle the Ring overlay to compare the surviving dots against the boundary path.</p>
           <div class="chip-bar">
-            <span class="chip-bar-label">Data &amp; Geometry</span>
+            <span class="chip-bar-label">Explore ▸</span>
             <button class="chip" data-chip="bins">Magnitude bins</button>
             <button class="chip" data-chip="frequency">Frequency</button>
             <button class="chip" data-chip="pattern">Pattern path</button>
@@ -353,7 +353,7 @@
           histogram. The shape that appears has a name: a <strong>long right tail</strong>. Small quakes are
           everyday events; giants are vanishingly rare — but they exist, far out on the right.</p>
           <div class="chip-bar">
-            <span class="chip-bar-label">Data &amp; Geometry</span>
+            <span class="chip-bar-label">Explore ▸</span>
             <button class="chip" data-chip="axes">Axes</button>
             <button class="chip" data-chip="bars">Bars</button>
             <button class="chip" data-chip="tail">Right tail</button>
@@ -392,7 +392,7 @@
           quakes all span the same range of magnitudes. <strong>Finding no clear relationship is a real
           finding</strong>, and an important one.</p>
           <div class="chip-bar">
-            <span class="chip-bar-label">Data &amp; Geometry</span>
+            <span class="chip-bar-label">Explore ▸</span>
             <button class="chip" data-chip="axes">Axes</button>
             <button class="chip" data-chip="depth">Depth groups</button>
             <button class="chip" data-chip="trend">Trend guide</button>
@@ -439,7 +439,7 @@
           cluster…) and <strong>one number or pattern observation</strong> (a count, a magnitude, "most",
           "rare"…).</p>
           <div class="chip-bar">
-            <span class="chip-bar-label">Data &amp; Geometry</span>
+            <span class="chip-bar-label">Explore ▸</span>
             <button class="chip" data-chip="pattern">Pattern path</button>
             <button class="chip" data-chip="bins">Magnitude bins</button>
             <button class="chip" data-chip="frequency">Frequency</button>
@@ -464,11 +464,39 @@
 
 </main>
 
+<section class="lesson-end" id="lesson-end">
+  <p class="end-kicker">Lesson complete</p>
+  <h2>You mapped Earth's anger.</h2>
+  <p>You started from one dot at one pair of coordinates and built a full evidence chain — the same
+  moves a working data scientist makes.</p>
+  <ul class="end-recap">
+    <li>A single point became a <strong>dataset</strong> of 800 real USGS earthquakes.</li>
+    <li>The dots weren't random — they traced <strong>lines, arcs, and clusters</strong> along the Pacific edge.</li>
+    <li>Every dot carries <strong>location, magnitude, depth, and time</strong>.</li>
+    <li><strong>Filtering</strong> by magnitude sharpened the pattern instead of erasing it.</li>
+    <li>A histogram revealed a <strong>long right tail</strong>: big quakes are rare but real.</li>
+    <li>A scatter plot showed <strong>no clear link</strong> between depth and magnitude — a real finding.</li>
+    <li>The pattern has a name: the <strong>Pacific Ring of Fire</strong>, and Kobe sits on its western edge.</li>
+  </ul>
+  <div class="end-claim" id="end-claim" hidden>
+    <div class="end-claim-label">Your evidence-based claim</div>
+    <blockquote id="end-claim-text"></blockquote>
+  </div>
+  <div class="end-actions">
+    <button class="end-btn secondary" id="end-top">Back to the top</button>
+    <button class="end-btn" id="end-restart">Start over</button>
+  </div>
+</section>
+
 <footer class="lesson-footer">
   <p>Savvas Data Show · classroom prototype · earthquake data: USGS earthquake catalog — random sample of 800 M5.5+ events (2000–2025) + the 1995 Kobe mainshock.</p>
 </footer>
 
 <div class="map-tooltip" id="map-tooltip" hidden></div>
+
+<div class="scroll-fade" id="scroll-fade" aria-hidden="true">
+  <div class="scroll-cue"><span>⌄</span>scroll</div>
+</div>
 
 <div id="audio-rack" hidden>
   <audio id="audio-1" src="assets/audio/step1.mp3" preload="none"></audio>
@@ -488,6 +516,6 @@
 <script src="data/land-50m.js"></script>
 <script src="data/plates.js"></script>
 <script src="data/quakes.js"></script>
-<script src="app.js?v=6"></script>
+<script src="app.js?v=7"></script>
 </body>
 </html>

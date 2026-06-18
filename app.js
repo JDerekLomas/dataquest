@@ -1886,6 +1886,7 @@
   for (var an = 1; an <= 9; an++) audios[an] = document.getElementById('audio-' + an);
   var audioUnlocked = false;
   var currentStep = 1;
+  var reviewSetStep = function () {};   // no-op unless review mode is enabled (?review=true)
 
   function pauseAllAudio(except) {
     for (var k in audios) { if (+k !== except && !audios[k].paused) audios[k].pause(); }
@@ -1914,6 +1915,7 @@
       if (!e.isIntersecting) return;
       var n = +e.target.dataset.step;
       currentStep = n;
+      reviewSetStep(n);
       if (!isUnlocked(n)) showGate(n);
       else playStep(n);
     });
@@ -1970,5 +1972,117 @@
     else if (rn === 9) renderClaimAccepted(true);
     else renderGradeRadio(rn, v, true);
   }
+
+  /* ---------- scroll-fade cue ---------- */
+  var scrollFade = document.getElementById('scroll-fade');
+  if (scrollFade) {
+    var updateFade = function () {
+      var nearBottom = window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 12;
+      scrollFade.classList.toggle('at-bottom', nearBottom);
+    };
+    window.addEventListener('scroll', updateFade, { passive: true });
+    window.addEventListener('resize', updateFade);
+    updateFade();
+  }
+
+  /* ---------- end / completion screen ---------- */
+  var endClaim = document.getElementById('end-claim');
+  var endClaimText = document.getElementById('end-claim-text');
+  function syncEndClaim() {
+    if (!endClaim) return;
+    var c = (claimEl ? claimEl.value : '').trim();
+    if (c) { endClaimText.textContent = '“' + c + '”'; endClaim.hidden = false; }
+    else { endClaim.hidden = true; }
+  }
+  syncEndClaim();
+  if (claimEl) claimEl.addEventListener('input', syncEndClaim);
+  var endTop = document.getElementById('end-top');
+  if (endTop) endTop.addEventListener('click', function () { window.scrollTo({ top: 0, behavior: 'smooth' }); });
+  var endRestart = document.getElementById('end-restart');
+  if (endRestart) endRestart.addEventListener('click', function () {
+    if (!window.confirm('Start the lesson over? This clears your answers, notes, and claim on this device.')) return;
+    try { localStorage.removeItem(STORE_KEY); } catch (e) {}
+    location.reload();
+  });
+
+  /* ---------- review mode (client feedback) — enable with ?review=true ---------- */
+  (function initReview() {
+    var params;
+    try { params = new URLSearchParams(location.search); } catch (e) { return; }
+    if (params.get('review') !== 'true') return;
+
+    var RKEY = 'dataquest-review-v1';
+    var comments = {};
+    try { comments = JSON.parse(localStorage.getItem(RKEY) || '{}') || {}; } catch (e) { comments = {}; }
+
+    var panel = document.createElement('div');
+    panel.className = 'review-panel';
+    panel.innerHTML =
+      '<div class="review-head"><span><strong>Reviewer feedback</strong>' +
+      '<span class="review-badge" id="rv-badge">0</span></span><span id="rv-toggle">▾</span></div>' +
+      '<div class="review-body">' +
+      '<div class="review-step-label">Commenting on <strong id="rv-step">Step 1</strong></div>' +
+      '<textarea id="rv-text" placeholder="What works, what to change on this step…"></textarea>' +
+      '<div class="review-saved" id="rv-saved"></div>' +
+      '<div class="review-actions"><button class="secondary" id="rv-export">Export all</button>' +
+      '<button id="rv-clear">Clear step</button></div></div>';
+    document.body.appendChild(panel);
+
+    var toggle = panel.querySelector('#rv-toggle');
+    panel.querySelector('.review-head').addEventListener('click', function () {
+      panel.classList.toggle('collapsed');
+      toggle.textContent = panel.classList.contains('collapsed') ? '▸' : '▾';
+    });
+
+    var stepLabel = panel.querySelector('#rv-step');
+    var textEl = panel.querySelector('#rv-text');
+    var savedEl = panel.querySelector('#rv-saved');
+    var badge = panel.querySelector('#rv-badge');
+    var activeStep = currentStep || 1;
+
+    function stepTitle(n) {
+      var h = document.querySelector('#step-' + n + ' h2');
+      return h ? h.textContent.trim() : 'Step ' + n;
+    }
+    function updateBadge() {
+      badge.textContent = Object.keys(comments).filter(function (k) { return (comments[k] || '').trim(); }).length;
+    }
+    function loadStep(n) {
+      activeStep = n;
+      stepLabel.textContent = 'Step ' + n + ' — ' + stepTitle(n);
+      textEl.value = comments[n] || '';
+    }
+    var saveTimer = null;
+    textEl.addEventListener('input', function () {
+      comments[activeStep] = textEl.value;
+      clearTimeout(saveTimer);
+      saveTimer = setTimeout(function () {
+        try { localStorage.setItem(RKEY, JSON.stringify(comments)); } catch (e) {}
+        savedEl.textContent = 'Saved ✓'; updateBadge();
+        setTimeout(function () { savedEl.textContent = ''; }, 1200);
+      }, 350);
+    });
+    panel.querySelector('#rv-clear').addEventListener('click', function () {
+      delete comments[activeStep]; textEl.value = '';
+      try { localStorage.setItem(RKEY, JSON.stringify(comments)); } catch (e) {}
+      updateBadge();
+    });
+    panel.querySelector('#rv-export').addEventListener('click', function () {
+      var out = { lesson: "Map Earth's Anger", exported: new Date().toISOString(), comments: {} };
+      for (var n = 1; n <= 9; n++) {
+        if ((comments[n] || '').trim()) out.comments['step' + n] = { title: stepTitle(n), comment: comments[n] };
+      }
+      var blob = new Blob([JSON.stringify(out, null, 2)], { type: 'application/json' });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url; a.download = 'dataquest-review.json'; a.click();
+      setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+    });
+
+    reviewSetStep = function (n) { if (n !== activeStep) loadStep(n); };
+    loadStep(activeStep);
+    updateBadge();
+  })();
+
   applyGates();
 })();
