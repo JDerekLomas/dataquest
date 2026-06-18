@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Broad Street Pump — Savvas Data Show</title>
+<link rel="stylesheet" href="styles.css?v=1">
+</head>
+<body>
+
+<div class="intro-screen" id="intro-screen">
+  <div class="intro-inner">
+    <p class="intro-kicker">Savvas Data Show · Data literacy · Grades 9–11</p>
+    <h1 class="intro-title">The Broad Street Pump</h1>
+    <p class="intro-lede">In the summer of 1854, cholera tore through Soho, London. Nobody knew what
+    caused it. You'll start from a single death on a map and build the evidence — plotting points,
+    finding the cluster, and testing a cause — to solve the outbreak the way Dr. John Snow did, and
+    invent the science of the data map.</p>
+    <p class="intro-meta">9 steps · about 15 minutes · narrated. Every dot is a <strong>real</strong>
+    record — 578 cholera deaths and 13 water pumps from Snow's own 1854 survey of Soho.</p>
+    <div class="intro-actions">
+      <button class="intro-begin" id="intro-begin">Begin the investigation ▶</button>
+      <label class="intro-sound"><input type="checkbox" id="intro-mute"> Start muted (no narration)</label>
+    </div>
+  </div>
+</div>
+
+<nav class="topnav">
+  <div class="nav-left">
+    <span class="brand">Savvas <strong>Data Show</strong></span>
+    <span class="crumb">The Broad Street Pump · Soho, 1854</span>
+  </div>
+  <div class="nav-progress" aria-label="Lesson progress">
+    <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
+    <span class="progress-label" id="progress-label">0 / 9 checks</span>
+  </div>
+  <div class="nav-right">
+    <button class="nav-btn" id="nav-sound">Sound: on</button>
+    <button class="nav-btn" id="nav-notes">Notes</button>
+    <button class="nav-btn" id="nav-data">Data</button>
+    <button class="nav-btn" id="nav-explore">Explore</button>
+  </div>
+</nav>
+
+<div class="notes-panel" id="notes-panel" hidden>
+  <div class="notes-head"><span>My notes</span><button class="panel-close" id="notes-close">×</button></div>
+  <textarea id="notes-text" placeholder="Jot observations here. Notes stay on this page only."></textarea>
+</div>
+
+<div class="data-modal" id="data-modal" hidden>
+  <div class="data-modal-inner">
+    <div class="notes-head"><span>The dataset</span><button class="panel-close" id="data-close">×</button></div>
+    <p class="data-note">Real records from <strong>Dr. John Snow's 1854 survey</strong> of the Soho
+    cholera outbreak: 578 death locations and 13 public water pumps, digitized from Snow's map
+    (Dodson &amp; Tobler) on a shared coordinate grid.</p>
+    <div class="data-table-wrap"><table id="data-table"></table></div>
+  </div>
+</div>
+
+<header class="lesson-header">
+  <p class="kicker">Data literacy · Grades 9–11</p>
+  <h1>The Broad Street Pump</h1>
+  <p class="lede">In the late summer of 1854, a cholera outbreak killed hundreds of people in a few
+  Soho streets in just days. The cause was a mystery — most doctors blamed "bad air." A physician
+  named John Snow had a different idea, and he tested it with a <strong>map</strong>. In this lesson
+  you'll retrace his investigation with his real data — 578 deaths and 13 water pumps — and discover
+  how a picture of points became proof.</p>
+</header>
+
+<main id="lesson">
+
+  <!-- ============ STEP 1 ============ -->
+  <section class="step" id="step-1" data-step="1">
+    <div class="step-inner">
+      <div class="viz-col">
+        <div class="viz-frame">
+          <div class="viz-container" id="viz-1" aria-label="Map of Soho with one cholera death marked"></div>
+          <div class="viz-controls">
+            <button class="util-btn" data-util="zoom-in" title="Zoom in">+</button>
+            <button class="util-btn" data-util="zoom-out" title="Zoom out">−</button>
+            <button class="util-btn" data-util="reset" title="Reset view">⟲</button>
+          </div>
+        </div>
+        <div class="instruction-bar" id="inst-1">Find the pulsing dot. That is one death, at one location on Broad Street.</div>
+      </div>
+      <div class="card-col">
+        <article class="story-card">
+          <div class="step-label">Step 1 of 9</div>
+          <h2>One death in Soho</h2>
+          <p>On the last day of August 1854, people on Broad Street began dying of cholera within hours
+          of falling ill. On the map, the first death is just one dot at one location — but it has a
+          <strong>where</strong>, a <strong>when</strong>, and a household around it.</p>
+          <p>What clues make a single death worth investigating?</p>
+          <div class="chip-bar">
+            <span class="chip-bar-label">Explore ▸</span>
+            <button class="chip" data-chip="location">Location</button>
+            <button class="chip" data-chip="when">When</button>
+            <button class="chip" data-chip="street">Street</button>
+            <button class="chip" data-chip="source">Data source</button>
+          </div>
+          <div class="mcq" id="mcq-1">
+            <p class="mcq-q">Which clue makes this death worth a closer look?</p>
+            <label class="mcq-choice"><input type="radio" name="mcq1" value="A"><span>Its location pins exactly where it happened</span></label>
+            <label class="mcq-choice"><input type="radio" name="mcq1" value="B"><span>It happened in a tight window of days</span></label>
+            <label class="mcq-choice"><input type="radio" name="mcq1" value="C"><span>Other deaths nearby might hint at a pattern</span></label>
+            <label class="mcq-choice"><input type="radio" name="mcq1" value="D"><span>All of these together</span></label>
+            <button class="check-btn" data-check="1">Check my answer</button>
+            <div class="mcq-feedback" hidden></div>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ STEP 2 ============ -->
+  <section class="step" id="step-2" data-step="2">
+    <div class="step-inner">
+      <div class="viz-col">
+        <div class="viz-frame">
+          <div class="viz-container" id="viz-2" aria-label="Soho map filling with cholera deaths"></div>
+          <div class="viz-controls">
+            <button class="util-btn" data-util="zoom-in" title="Zoom in">+</button>
+            <button class="util-btn" data-util="zoom-out" title="Zoom out">−</button>
+            <button class="util-btn" data-util="reset" title="Reset view">⟲</button>
+          </div>
+        </div>
+        <div class="instruction-bar" id="inst-2">Watch one death become a dataset. Pan and zoom freely.</div>
+      </div>
+      <div class="card-col">
+        <article class="story-card">
+          <div class="step-label">Step 2 of 9</div>
+          <h2>One death becomes a dataset</h2>
+          <p>A single location can't tell you whether a place is unusual or typical. To judge that, you
+          need company — many records of the same kind, plotted in the same space.</p>
+          <p>Here is that first death again, now joined by every cholera death Snow recorded in the
+          outbreak: <strong>578 real deaths</strong>, each at its true address.</p>
+          <div class="chip-bar">
+            <span class="chip-bar-label">Explore ▸</span>
+            <button class="chip" data-chip="location">Location</button>
+            <button class="chip" data-chip="count">Count</button>
+            <button class="chip" data-chip="compare">Compare</button>
+            <button class="chip" data-chip="source">Data source</button>
+          </div>
+          <div class="mcq" id="mcq-2">
+            <p class="mcq-q">What changes when one death becomes many?</p>
+            <label class="mcq-choice"><input type="radio" name="mcq2" value="A"><span>The map gets too crowded to read</span></label>
+            <label class="mcq-choice"><input type="radio" name="mcq2" value="B"><span>A pattern in space becomes possible to see</span></label>
+            <label class="mcq-choice"><input type="radio" name="mcq2" value="C"><span>Each individual record becomes less accurate</span></label>
+            <label class="mcq-choice"><input type="radio" name="mcq2" value="D"><span>Nothing — one death tells us just as much</span></label>
+            <button class="check-btn" data-check="2">Check my answer</button>
+            <div class="mcq-feedback" hidden></div>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ STEP 3 ============ -->
+  <section class="step" id="step-3" data-step="3">
+    <div class="step-inner">
+      <div class="viz-col">
+        <div class="viz-frame">
+          <div class="viz-container" id="viz-3" aria-label="Soho map showing the death cluster"></div>
+          <div class="viz-controls">
+            <button class="util-btn" data-util="zoom-in" title="Zoom in">+</button>
+            <button class="util-btn" data-util="zoom-out" title="Zoom out">−</button>
+            <button class="util-btn" data-util="reset" title="Reset view">⟲</button>
+            <button class="util-btn util-layer" data-util="shuffle" title="Compare: scatter the deaths at random">⤨ Shuffle</button>
+          </div>
+        </div>
+        <div class="instruction-bar" id="inst-3">Do the deaths spread evenly across Soho — or pile up somewhere?</div>
+      </div>
+      <div class="card-col">
+        <article class="story-card">
+          <div class="step-label">Step 3 of 9</div>
+          <h2>The reveal</h2>
+          <p>Here are all 578 deaths on the streets of Soho. If cholera struck at random, the dots would
+          sprinkle evenly across every street and square.</p>
+          <p>They don't. The dots pile into a dense <strong>cluster</strong> around one small area, thinning
+          out as you move away. Press <strong>Shuffle</strong> to scatter the same number of deaths at
+          random — the difference is the whole point.</p>
+          <div class="chip-bar">
+            <span class="chip-bar-label">Explore ▸</span>
+            <button class="chip" data-chip="cluster">Cluster</button>
+            <button class="chip" data-chip="compare">Compare</button>
+            <button class="chip" data-chip="center">Center</button>
+            <button class="chip" data-chip="count">Count</button>
+          </div>
+          <div class="mcq" id="mcq-3">
+            <p class="mcq-q">What does the arrangement of dots reveal?</p>
+            <label class="mcq-choice"><input type="radio" name="mcq3" value="A"><span>Deaths scatter evenly across all of Soho</span></label>
+            <label class="mcq-choice"><input type="radio" name="mcq3" value="B"><span>The deaths pile into a dense cluster around one area</span></label>
+            <label class="mcq-choice"><input type="radio" name="mcq3" value="C"><span>Deaths happen only on the widest streets</span></label>
+            <label class="mcq-choice"><input type="radio" name="mcq3" value="D"><span>The dots form an evenly spaced grid</span></label>
+            <button class="check-btn" data-check="3">Check my answer</button>
+            <div class="mcq-feedback" hidden></div>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ STEP 4 ============ -->
+  <section class="step" id="step-4" data-step="4">
+    <div class="step-inner">
+      <div class="viz-col">
+        <div class="viz-frame">
+          <div class="viz-container" id="viz-4" aria-label="Soho map with one death record opened"></div>
+          <div class="viz-controls">
+            <button class="util-btn" data-util="zoom-in" title="Zoom in">+</button>
+            <button class="util-btn" data-util="zoom-out" title="Zoom out">−</button>
+            <button class="util-btn" data-util="reset" title="Reset view">⟲</button>
+          </div>
+        </div>
+        <div class="instruction-bar" id="inst-4">Every dot is a person and a record. Click one to read its fields.</div>
+      </div>
+      <div class="card-col">
+        <article class="story-card">
+          <div class="step-label">Step 4 of 9</div>
+          <div class="expert-tag"><span class="expert-avatar">JS</span><span><strong>Dr. John Snow</strong><br>Physician, London · 1854</span></div>
+          <h2>What a record knows</h2>
+          <p>"I did not collect dots. For every death I recorded a <strong>location</strong>, a
+          <strong>date</strong>, and what I could learn of the household — who lived there, and where they
+          drew their water. The map you see draws the location; the rest of each record sits underneath."</p>
+          <p class="fine-print">Each point here is a real death from Snow's 1854 register; the map plots its true location.</p>
+          <div class="chip-bar">
+            <span class="chip-bar-label">Explore ▸</span>
+            <button class="chip" data-chip="location">Location</button>
+            <button class="chip" data-chip="when">Date</button>
+            <button class="chip" data-chip="water">Water source</button>
+            <button class="chip" data-chip="source">Data source</button>
+          </div>
+          <div class="mcq" id="mcq-4">
+            <p class="mcq-q">In Snow's investigation, each death record carried…</p>
+            <label class="mcq-choice"><input type="radio" name="mcq4" value="A"><span>Only a location on the map</span></label>
+            <label class="mcq-choice"><input type="radio" name="mcq4" value="B"><span>A location, a date, and household details like the water source</span></label>
+            <label class="mcq-choice"><input type="radio" name="mcq4" value="C"><span>Only the cause of death</span></label>
+            <label class="mcq-choice"><input type="radio" name="mcq4" value="D"><span>The name of the nearest hospital</span></label>
+            <button class="check-btn" data-check="4">Check my answer</button>
+            <div class="mcq-feedback" hidden></div>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ STEP 5 ============ -->
+  <section class="step" id="step-5" data-step="5">
+    <div class="step-inner">
+      <div class="viz-col">
+        <div class="viz-frame">
+          <div class="viz-container" id="viz-5" aria-label="Soho map for free exploration"></div>
+          <div class="viz-controls">
+            <button class="util-btn" data-util="zoom-in" title="Zoom in">+</button>
+            <button class="util-btn" data-util="zoom-out" title="Zoom out">−</button>
+            <button class="util-btn" data-util="reset" title="Reset view">⟲</button>
+          </div>
+        </div>
+        <div class="instruction-bar" id="inst-5">Pan, zoom, hover. Explore freely — there is no wrong observation here.</div>
+      </div>
+      <div class="card-col">
+        <article class="story-card">
+          <div class="step-label">Step 5 of 9</div>
+          <h2>Notice &amp; wonder</h2>
+          <p>Scientists start with open eyes, not answers. Drag and zoom the map. Hover dots to read their
+          location. Then tag every shape you can honestly say you see in the deaths — several answers can be
+          true at once.</p>
+          <div class="chip-bar">
+            <span class="chip-bar-label">Explore ▸</span>
+            <button class="chip" data-chip="cluster">Cluster</button>
+            <button class="chip" data-chip="center">Center</button>
+            <button class="chip" data-chip="compare">Compare</button>
+            <button class="chip" data-chip="count">Count</button>
+          </div>
+          <div class="mcq mcq-multi" id="mcq-5">
+            <p class="mcq-q">Which shapes do you see in the dots? Tag all that apply.</p>
+            <div class="tag-grid">
+              <label class="mcq-choice tag"><input type="checkbox" name="mcq5" value="cluster"><span>Cluster</span></label>
+              <label class="mcq-choice tag"><input type="checkbox" name="mcq5" value="dense center"><span>Dense center</span></label>
+              <label class="mcq-choice tag"><input type="checkbox" name="mcq5" value="thinning edges"><span>Thinning edges</span></label>
+              <label class="mcq-choice tag"><input type="checkbox" name="mcq5" value="gap"><span>Gaps</span></label>
+              <label class="mcq-choice tag"><input type="checkbox" name="mcq5" value="line"><span>Lines along streets</span></label>
+              <label class="mcq-choice tag"><input type="checkbox" name="mcq5" value="scattered"><span>Scattered</span></label>
+            </div>
+            <button class="check-btn" data-check="5">Save my observations</button>
+            <div class="mcq-feedback" hidden></div>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ STEP 6 ============ -->
+  <section class="step" id="step-6" data-step="6">
+    <div class="step-inner">
+      <div class="viz-col">
+        <div class="viz-frame">
+          <div class="viz-container" id="viz-6" aria-label="Soho map with water pumps overlaid"></div>
+          <div class="viz-controls">
+            <button class="util-btn" data-util="zoom-in" title="Zoom in">+</button>
+            <button class="util-btn" data-util="zoom-out" title="Zoom out">−</button>
+            <button class="util-btn" data-util="reset" title="Reset view">⟲</button>
+            <button class="util-btn util-layer" data-util="nearest" title="Color each death by its nearest pump">Nearest pump</button>
+          </div>
+        </div>
+        <div class="instruction-bar" id="inst-6">Turn on the 13 pumps. Which one sits in the heart of the cluster?</div>
+      </div>
+      <div class="card-col">
+        <article class="story-card">
+          <div class="step-label">Step 6 of 9</div>
+          <h2>Add the suspect: water pumps</h2>
+          <p>Soho got its drinking water from public street pumps. Snow's hunch was that cholera spread
+          through water, not air — so he added all <strong>13 neighborhood pumps</strong> to the map.</p>
+          <p>Press <strong>Nearest pump</strong> to color each death by the pump closest to it. One pump's
+          color floods the cluster: <strong>359 of the 578 deaths</strong> are nearest to it.</p>
+          <div class="chip-bar">
+            <span class="chip-bar-label">Explore ▸</span>
+            <button class="chip" data-chip="pumps">Pumps</button>
+            <button class="chip" data-chip="nearest">Nearest pump</button>
+            <button class="chip" data-chip="center">Center</button>
+            <button class="chip" data-chip="cluster">Cluster</button>
+          </div>
+          <div class="mcq" id="mcq-6">
+            <p class="mcq-q"><span class="evidence-flag">Visual evidence check</span> Turn on "Nearest pump," then answer: which pump sits at the center of the deaths?</p>
+            <label class="mcq-choice"><input type="radio" name="mcq6" value="A"><span>The Dean Street pump, on the far right</span></label>
+            <label class="mcq-choice"><input type="radio" name="mcq6" value="B"><span>The Broad Street pump, in the heart of the cluster</span></label>
+            <label class="mcq-choice"><input type="radio" name="mcq6" value="C"><span>The Oxford Market pump, at the top</span></label>
+            <label class="mcq-choice"><input type="radio" name="mcq6" value="D"><span>No pump is near the deaths at all</span></label>
+            <button class="check-btn" data-check="6">Check evidence</button>
+            <div class="mcq-feedback" hidden></div>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ STEP 7 ============ -->
+  <section class="step" id="step-7" data-step="7">
+    <div class="step-inner">
+      <div class="viz-col">
+        <div class="viz-frame">
+          <div class="viz-container" id="viz-7" aria-label="Bar chart of deaths by nearest pump"></div>
+        </div>
+        <div class="instruction-bar" id="inst-7">Read the bars left to right. One pump towers over the rest.</div>
+      </div>
+      <div class="card-col">
+        <article class="story-card">
+          <div class="step-label">Step 7 of 9</div>
+          <h2>The distribution lens</h2>
+          <p>Leave the map for a moment. Count how many deaths are nearest to each pump and stack the counts
+          into a bar chart. Grouping data by a category — here, the nearest pump — is one of the most powerful
+          moves in analysis.</p>
+          <p>The shape is lopsided: one bar towers over all twelve others. <strong>Broad Street: 359
+          deaths.</strong> The next-largest pump claims just 64.</p>
+          <div class="chip-bar">
+            <span class="chip-bar-label">Explore ▸</span>
+            <button class="chip" data-chip="axes">Axes</button>
+            <button class="chip" data-chip="bars">Bars</button>
+            <button class="chip" data-chip="broad">Broad Street</button>
+            <button class="chip" data-chip="count">Count</button>
+          </div>
+          <div class="mcq" id="mcq-7">
+            <p class="mcq-q">What does this bar chart show?</p>
+            <label class="mcq-choice"><input type="radio" name="mcq7" value="A"><span>The deaths are split evenly among the 13 pumps</span></label>
+            <label class="mcq-choice"><input type="radio" name="mcq7" value="B"><span>One pump accounts for far more deaths than any other</span></label>
+            <label class="mcq-choice"><input type="radio" name="mcq7" value="C"><span>Most pumps have no deaths nearby</span></label>
+            <label class="mcq-choice"><input type="radio" name="mcq7" value="D"><span>The Dean Street pump has the most deaths</span></label>
+            <button class="check-btn" data-check="7">Check my answer</button>
+            <div class="mcq-feedback" hidden></div>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ STEP 8 ============ -->
+  <section class="step" id="step-8" data-step="8">
+    <div class="step-inner">
+      <div class="viz-col">
+        <div class="viz-frame">
+          <div class="viz-container" id="viz-8" aria-label="Chart of deaths versus distance from the Broad Street pump"></div>
+        </div>
+        <div class="instruction-bar" id="inst-8">Each bar counts deaths at a given distance from the Broad Street pump. Hunt for a trend — honestly.</div>
+      </div>
+      <div class="card-col">
+        <article class="story-card">
+          <div class="step-label">Step 8 of 9</div>
+          <h2>Is the pump really the cause?</h2>
+          <p>A cluster near a pump could be a coincidence — lots of people simply live there. So test the idea
+          directly: if the Broad Street pump is the source, deaths should <strong>fall off</strong> as you walk
+          away from it.</p>
+          <p>They do, sharply. Deaths peak one to three blocks out and collapse beyond four.
+          <strong>A clear relationship between distance and deaths is real evidence</strong> — unlike a flat,
+          trendless chart, this one points straight at the pump.</p>
+          <div class="chip-bar">
+            <span class="chip-bar-label">Explore ▸</span>
+            <button class="chip" data-chip="axes">Axes</button>
+            <button class="chip" data-chip="falloff">Falloff</button>
+            <button class="chip" data-chip="trend">Trend guide</button>
+            <button class="chip" data-chip="broad">Broad Street</button>
+          </div>
+          <div class="mcq" id="mcq-8">
+            <p class="mcq-q">Based on this chart, is there a relationship between distance from the Broad Street pump and the number of deaths?</p>
+            <label class="mcq-choice"><input type="radio" name="mcq8" value="A"><span>No — deaths are spread evenly at every distance</span></label>
+            <label class="mcq-choice"><input type="radio" name="mcq8" value="B"><span>Yes — deaths fall off sharply as distance from the pump grows</span></label>
+            <label class="mcq-choice"><input type="radio" name="mcq8" value="C"><span>Yes — deaths increase the farther you go from the pump</span></label>
+            <label class="mcq-choice"><input type="radio" name="mcq8" value="D"><span>There is no way to tell from this chart</span></label>
+            <button class="check-btn" data-check="8">Check my answer</button>
+            <div class="mcq-feedback" hidden></div>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ STEP 9 ============ -->
+  <section class="step" id="step-9" data-step="9">
+    <div class="step-inner">
+      <div class="viz-col">
+        <div class="viz-frame">
+          <div class="viz-container" id="viz-9" aria-label="Soho map with the Broad Street pump highlighted"></div>
+          <div class="viz-controls">
+            <button class="util-btn" data-util="zoom-in" title="Zoom in">+</button>
+            <button class="util-btn" data-util="zoom-out" title="Zoom out">−</button>
+            <button class="util-btn" data-util="reset" title="Reset view">⟲</button>
+            <button class="util-btn util-layer" data-util="handle" title="Remove the pump handle, as Snow convinced officials to do">⛏ Remove the handle</button>
+          </div>
+        </div>
+        <div class="instruction-bar" id="inst-9">The evidence points at one pump. Make the claim, then remove the handle.</div>
+      </div>
+      <div class="card-col">
+        <article class="story-card">
+          <div class="step-label">Step 9 of 9</div>
+          <h2>Name the finding: the Broad Street pump</h2>
+          <p>The cluster centers on the <strong>Broad Street pump</strong>: 359 of 578 deaths are nearest to
+          it, and deaths fall off with every block away. Snow took this map to the parish officials and asked
+          them to remove the pump's handle so no one could draw water. The outbreak was already fading — but
+          the map changed how the world understands disease.</p>
+          <p>Now make it yours. Write a claim that uses <strong>one shape word</strong> (cluster, center,
+          ring…) and <strong>one number or pattern observation</strong> (a count, "most", "62%"…).</p>
+          <div class="chip-bar">
+            <span class="chip-bar-label">Explore ▸</span>
+            <button class="chip" data-chip="cluster">Cluster</button>
+            <button class="chip" data-chip="broad">Broad Street</button>
+            <button class="chip" data-chip="count">Count</button>
+            <button class="chip" data-chip="center">Center</button>
+          </div>
+          <div class="mcq" id="mcq-9">
+            <p class="mcq-q"><span class="evidence-flag">Visual evidence check</span> Your claim:</p>
+            <textarea id="claim-text" rows="4" placeholder="Example shape: “The deaths form a tight cluster centered on the Broad Street pump — 359 of 578 are nearest to it — use the Count chip to back up your number.”"></textarea>
+            <div class="claim-hints">
+              <span class="hint-pill" data-hint="cluster">cluster</span>
+              <span class="hint-pill" data-hint="center">center</span>
+              <span class="hint-pill" data-hint="ring">ring</span>
+              <span class="hint-pill" data-hint="band">band</span>
+            </div>
+            <button class="check-btn" data-check="9">Check evidence</button>
+            <div class="mcq-feedback" hidden></div>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<section class="lesson-end" id="lesson-end">
+  <p class="end-kicker">Case closed</p>
+  <h2>You found the Broad Street pump.</h2>
+  <p>You started from one death at one location and built a full evidence chain — the same moves John
+  Snow used to invent epidemiology, and the same moves a working data scientist makes today.</p>
+  <ul class="end-recap">
+    <li>A single death became a <strong>dataset</strong> of 578 real records.</li>
+    <li>The deaths weren't random — they formed a dense <strong>cluster</strong>, not an even sprinkle.</li>
+    <li>Every record carries <strong>location, date, and household</strong> details.</li>
+    <li>Overlaying the <strong>13 pumps</strong> revealed one at the cluster's heart: Broad Street.</li>
+    <li>A bar chart showed Broad Street with <strong>359 deaths</strong> — six times its nearest rival.</li>
+    <li>Deaths <strong>fell off sharply</strong> with distance from the pump — a real relationship, not a flat line.</li>
+    <li>The finding has a name and a fix: the <strong>Broad Street pump</strong> — remove the handle.</li>
+  </ul>
+  <div class="end-claim" id="end-claim" hidden>
+    <div class="end-claim-label">Your evidence-based claim</div>
+    <blockquote id="end-claim-text"></blockquote>
+  </div>
+  <div class="end-actions">
+    <button class="end-btn secondary" id="end-top">Back to the top</button>
+    <button class="end-btn" id="end-restart">Start over</button>
+  </div>
+</section>
+
+<footer class="lesson-footer">
+  <p>Savvas Data Show · classroom prototype · cholera data: Dr. John Snow's 1854 Soho survey — 578 deaths
+  and 13 pumps, digitized by Dodson &amp; Tobler (HistData / Rdatasets). Part of the Data Show series ·
+  <a href="../" style="color:#1B5FAA">← Mapping the Ring of Fire (earthquakes)</a>.</p>
+</footer>
+
+<div class="map-tooltip" id="map-tooltip" hidden></div>
+
+<div class="celebrate-toast" id="celebrate-toast" hidden></div>
+
+<div class="scroll-fade" id="scroll-fade" aria-hidden="true">
+  <div class="scroll-cue"><span>⌄</span>scroll</div>
+</div>
+
+<div id="audio-rack" hidden>
+  <audio id="audio-1" src="assets/audio/step1.mp3" preload="none"></audio>
+  <audio id="audio-2" src="assets/audio/step2.mp3" preload="none"></audio>
+  <audio id="audio-3" src="assets/audio/step3.mp3" preload="none"></audio>
+  <audio id="audio-4" src="assets/audio/step4.mp3" preload="none"></audio>
+  <audio id="audio-5" src="assets/audio/step5.mp3" preload="none"></audio>
+  <audio id="audio-6" src="assets/audio/step6.mp3" preload="none"></audio>
+  <audio id="audio-7" src="assets/audio/step7.mp3" preload="none"></audio>
+  <audio id="audio-8" src="assets/audio/step8.mp3" preload="none"></audio>
+  <audio id="audio-9" src="assets/audio/step9.mp3" preload="none"></audio>
+</div>
+
+<script src="d3.v7.min.js"></script>
+<script src="data/snow.js"></script>
+<script src="app.js?v=1"></script>
+</body>
+</html>
