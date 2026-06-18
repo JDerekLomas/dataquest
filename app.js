@@ -2006,47 +2006,30 @@
     if (footEl) footEl.classList.toggle('gate-hidden', hideEnd);
   }
 
-  // highest scroll position allowed: just enough to peek the next (locked) step
-  function scrollCeiling() {
-    if (reviewMode) return Infinity;
-    var F = firstLockedStep();
-    if (F === 0) return Infinity;
-    var sec = document.getElementById('step-' + F);
-    if (!sec) return Infinity;
-    // stop with the next step's top around mid-screen: the current step's
-    // question + Check button sit clearly above it, the next step dissolves below
-    var topDoc = sec.getBoundingClientRect().top + window.scrollY;
-    return Math.max(0, topDoc - window.innerHeight * 0.52);
-  }
-
-  var clamping = false;
-  function clampScroll() {
-    if (!clamping && !reviewMode) {
-      var ceil = scrollCeiling();
-      if (ceil !== Infinity && window.scrollY > ceil + 1) {
-        clamping = true;
-        window.scrollTo(0, ceil);
-        requestAnimationFrame(function () { clamping = false; });
-      }
-    }
-    updateScrollCue();
-  }
-
+  // The scroll simply STOPS at the natural bottom of the page: the next step is
+  // height-capped (see .peek-veil in CSS), so there is nothing to clamp and no
+  // snap-back bounce. This just keeps the bottom cue in sync.
   function updateScrollCue() {
     if (!scrollFadeEl || reviewMode) return;
-    var atBottom = window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 12;
-    scrollFadeEl.classList.toggle('at-bottom', atBottom);
     var cue = scrollFadeEl.querySelector('.scroll-cue');
-    if (!cue) return;
     var F = firstLockedStep();
-    var ceil = scrollCeiling();
-    var walled = F !== 0 && ceil !== Infinity && window.scrollY >= ceil - 6;
-    if (walled) {
-      cue.classList.add('cue-locked');
-      cue.innerHTML = 'Answer Step ' + (F - 1) + ' to keep going · <button type="button" class="cue-skip">skip</button>';
+    var nearBottom = window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 4;
+    if (F !== 0) {
+      // a locked step walls the page; the page already ends at the peek
+      scrollFadeEl.classList.remove('at-bottom');
+      if (cue) {
+        if (nearBottom) {
+          cue.classList.add('cue-locked');
+          cue.innerHTML = 'Answer Step ' + (F - 1) + ' to keep going · <button type="button" class="cue-skip">skip</button>';
+        } else {
+          cue.classList.remove('cue-locked');
+          cue.innerHTML = '<span>⌄</span>scroll';
+        }
+      }
     } else {
-      cue.classList.remove('cue-locked');
-      cue.innerHTML = '<span>⌄</span>scroll';
+      // everything unlocked: ordinary cue, hidden at the very end
+      scrollFadeEl.classList.toggle('at-bottom', nearBottom);
+      if (cue) { cue.classList.remove('cue-locked'); cue.innerHTML = '<span>⌄</span>scroll'; }
     }
   }
 
@@ -2061,8 +2044,8 @@
       saveState();
       applyGates();   // re-evaluates locks, reveal, and the cue
     });
-    window.addEventListener('scroll', clampScroll, { passive: true });
-    window.addEventListener('resize', clampScroll);
+    window.addEventListener('scroll', updateScrollCue, { passive: true });
+    window.addEventListener('resize', updateScrollCue);
   }
 
   revealGate();
