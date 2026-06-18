@@ -1878,6 +1878,7 @@
         if (note) note.remove();
       }
     }
+    revealGate();
   }
   applyGates();
 
@@ -1973,17 +1974,95 @@
     else renderGradeRadio(rn, v, true);
   }
 
-  /* ---------- scroll-fade cue ---------- */
-  var scrollFade = document.getElementById('scroll-fade');
-  if (scrollFade) {
-    var updateFade = function () {
-      var nearBottom = window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 12;
-      scrollFade.classList.toggle('at-bottom', nearBottom);
-    };
-    window.addEventListener('scroll', updateFade, { passive: true });
-    window.addEventListener('resize', updateFade);
-    updateFade();
+  /* ---------- progressive scroll gate ----------
+     You can scroll a little past the current step to glimpse the next one, but
+     the scroll stops there and everything below dissolves into white until you
+     answer. Steps further down (and the ending) stay hidden entirely. Disabled
+     in review mode so a client can read straight through. */
+  var reviewMode = false;
+  try { reviewMode = new URLSearchParams(location.search).get('review') === 'true'; } catch (e) {}
+
+  var scrollFadeEl = document.getElementById('scroll-fade');
+  if (reviewMode && scrollFadeEl) scrollFadeEl.style.display = 'none';
+
+  function firstLockedStep() {
+    for (var n = 2; n <= 9; n++) { if (!isUnlocked(n)) return n; }
+    return 0;
   }
+
+  // hide every step below the first locked one, plus the ending, until earned
+  function revealGate() {
+    var F = firstLockedStep();
+    for (var n = 1; n <= 9; n++) {
+      var sec = document.getElementById('step-' + n);
+      if (sec) sec.classList.toggle('gate-hidden', !reviewMode && F !== 0 && n > F);
+    }
+    var hideEnd = !reviewMode && !completed[9];
+    var endSec = document.getElementById('lesson-end');
+    var footEl = document.querySelector('.lesson-footer');
+    if (endSec) endSec.classList.toggle('gate-hidden', hideEnd);
+    if (footEl) footEl.classList.toggle('gate-hidden', hideEnd);
+  }
+
+  // highest scroll position allowed: just enough to peek the next (locked) step
+  function scrollCeiling() {
+    if (reviewMode) return Infinity;
+    var F = firstLockedStep();
+    if (F === 0) return Infinity;
+    var sec = document.getElementById('step-' + F);
+    if (!sec) return Infinity;
+    var topDoc = sec.getBoundingClientRect().top + window.scrollY;
+    return Math.max(0, topDoc - window.innerHeight * 0.40);
+  }
+
+  var clamping = false;
+  function clampScroll() {
+    if (!clamping && !reviewMode) {
+      var ceil = scrollCeiling();
+      if (ceil !== Infinity && window.scrollY > ceil + 1) {
+        clamping = true;
+        window.scrollTo(0, ceil);
+        requestAnimationFrame(function () { clamping = false; });
+      }
+    }
+    updateScrollCue();
+  }
+
+  function updateScrollCue() {
+    if (!scrollFadeEl || reviewMode) return;
+    var atBottom = window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 12;
+    scrollFadeEl.classList.toggle('at-bottom', atBottom);
+    var cue = scrollFadeEl.querySelector('.scroll-cue');
+    if (!cue) return;
+    var F = firstLockedStep();
+    var ceil = scrollCeiling();
+    var walled = F !== 0 && ceil !== Infinity && window.scrollY >= ceil - 6;
+    if (walled) {
+      cue.classList.add('cue-locked');
+      cue.innerHTML = 'Answer Step ' + (F - 1) + ' to keep going · <button type="button" class="cue-skip">skip</button>';
+    } else {
+      cue.classList.remove('cue-locked');
+      cue.innerHTML = '<span>⌄</span>scroll';
+    }
+  }
+
+  if (scrollFadeEl && !reviewMode) {
+    scrollFadeEl.addEventListener('click', function (ev) {
+      var sk = ev.target.closest && ev.target.closest('.cue-skip');
+      if (!sk) return;
+      var F = firstLockedStep();
+      if (!F) return;
+      skipUnlocked[F] = true;
+      state.skips[F] = true;
+      saveState();
+      applyGates();   // re-evaluates locks, reveal, and the cue
+    });
+    window.addEventListener('scroll', clampScroll, { passive: true });
+    window.addEventListener('resize', clampScroll);
+  }
+
+  revealGate();
+  updateScrollCue();
 
   /* ---------- end / completion screen ---------- */
   var endClaim = document.getElementById('end-claim');

@@ -449,13 +449,28 @@ button { font-family: inherit; cursor: pointer; }
 }
 .scroll-fade.at-bottom { opacity: 0; }
 .scroll-fade .scroll-cue {
-  position: absolute; left: 50%; bottom: 22px; transform: translateX(-50%);
+  position: absolute; left: 50%; bottom: 26px; transform: translateX(-50%);
   font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase;
-  color: var(--ink-faint);
+  color: var(--ink-faint); pointer-events: auto; white-space: nowrap;
   display: flex; flex-direction: column; align-items: center; gap: 2px;
   animation: scrollNudge 2.2s ease-in-out infinite;
 }
 .scroll-fade .scroll-cue span { font-size: 18px; line-height: 1; }
+.scroll-fade .scroll-cue.cue-locked {
+  flex-direction: row; gap: 10px; align-items: center;
+  background: rgba(31,41,51,0.92); color: #fff;
+  padding: 9px 9px 9px 16px; border-radius: 999px;
+  text-transform: none; letter-spacing: 0.01em; font-weight: 500;
+  box-shadow: 0 6px 20px rgba(31,41,51,0.28); animation: none;
+}
+.cue-skip {
+  background: rgba(255,255,255,0.18); color: #fff; border: none;
+  border-radius: 999px; padding: 4px 12px; font-size: 12px; font-weight: 500; cursor: pointer;
+}
+.cue-skip:hover { background: rgba(255,255,255,0.34); }
+
+/* steps and ending hidden until the gate releases them */
+.gate-hidden { display: none !important; }
 @keyframes scrollNudge { 0%,100% { transform: translateX(-50%) translateY(0); } 50% { transform: translateX(-50%) translateY(4px); } }
 
 /* ---------- End / completion screen ---------- */
