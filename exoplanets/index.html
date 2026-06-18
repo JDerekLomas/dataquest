@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Are We Alone? — Savvas Data Show</title>
+<link rel="stylesheet" href="styles.css?v=1">
+</head>
+<body>
+
+<div class="intro-screen" id="intro-screen">
+  <div class="intro-inner">
+    <p class="intro-kicker">Savvas Data Show · Data literacy · Grades 9–11</p>
+    <h1 class="intro-title">Are We Alone?</h1>
+    <p class="intro-lede">In 1995, astronomers found the first planet orbiting another sun-like star.
+    Since then we've confirmed thousands more. You'll start from that single world and build the evidence —
+    plotting planets by size and starlight — to answer a real question with real data: how many of these
+    worlds could be anything like Earth?</p>
+    <p class="intro-meta">9 steps · about 15 minutes. Every dot is a <strong>real</strong>
+    confirmed planet from NASA's Exoplanet Archive.</p>
+    <div class="intro-actions">
+      <button class="intro-begin" id="intro-begin">Begin the search ▶</button>
+      <label class="intro-sound"><input type="checkbox" id="intro-mute"> Start muted (no narration)</label>
+    </div>
+  </div>
+</div>
+
+<nav class="topnav">
+  <div class="nav-left">
+    <span class="brand">Savvas <strong>Data Show</strong></span>
+    <span class="crumb">Are We Alone? · NASA Exoplanet Archive</span>
+  </div>
+  <div class="nav-progress" aria-label="Lesson progress">
+    <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
+    <span class="progress-label" id="progress-label">0 / 9 checks</span>
+  </div>
+  <div class="nav-right">
+    <button class="nav-btn" id="nav-sound">Sound: on</button>
+    <button class="nav-btn" id="nav-notes">Notes</button>
+    <button class="nav-btn" id="nav-data">Data</button>
+    <button class="nav-btn" id="nav-explore">Explore</button>
+  </div>
+</nav>
+
+<div class="notes-panel" id="notes-panel" hidden>
+  <div class="notes-head"><span>My notes</span><button class="panel-close" id="notes-close">×</button></div>
+  <textarea id="notes-text" placeholder="Jot observations here. Notes stay on this page only."></textarea>
+</div>
+
+<div class="data-modal" id="data-modal" hidden>
+  <div class="data-modal-inner">
+    <div class="notes-head"><span>The dataset</span><button class="panel-close" id="data-close">×</button></div>
+    <p class="data-note">Real records from <strong>NASA's Exoplanet Archive</strong> (the
+    <em>pscomppars</em> confirmed-planet table): one row per confirmed exoplanet, with radius, mass,
+    orbit, starlight, host star, and how and when it was discovered.</p>
+    <div class="data-table-wrap"><table id="data-table"></table></div>
+  </div>
+</div>
+
+<header class="lesson-header">
+  <p class="kicker">Data literacy · Grades 9–11</p>
+  <h1>Are We Alone?</h1>
+  <p class="lede">For all of history, "are there other worlds like ours?" was a question for philosophers.
+  Since 1995 it has become a question for <strong>data</strong>. Astronomers have now confirmed thousands
+  of planets around other stars. In this lesson you'll plot them with their real measurements — size and
+  starlight — and discover for yourself how many could be rocky, temperate worlds like Earth.</p>
+</header>
+
+<main id="lesson">
+
+  <!-- ============ STEP 1 ============ -->
+  <section class="step" id="step-1" data-step="1">
+    <div class="step-inner">
+      <div class="viz-col">
+        <div class="viz-frame">
+          <div class="viz-container" id="viz-1" aria-label="A single exoplanet plotted by size and starlight"></div>
+          <div class="viz-controls">
+            <button class="util-btn" data-util="zoom-in" title="Zoom in">+</button>
+            <button class="util-btn" data-util="zoom-out" title="Zoom out">−</button>
+            <button class="util-btn" data-util="reset" title="Reset view">⟲</button>
+          </div>
+        </div>
+        <div class="instruction-bar" id="inst-1">Find the labeled dot. That is 51 Pegasi b — the first planet found around a sun-like star.</div>
+      </div>
+      <div class="card-col">
+        <article class="story-card">
+          <div class="step-label">Step 1 of 9</div>
+          <h2>One world, 50 light-years away</h2>
+          <p>In 1995, Michel Mayor and Didier Queloz detected <strong>51 Pegasi b</strong> — the first
+          confirmed planet circling a star like our Sun. It turned out to be a "hot Jupiter": a giant world
+          whipping around its star in just four days, far too scorched for life.</p>
+          <p>On a chart, it's one point with a size and a temperature. What makes a single planet worth
+          investigating?</p>
+          <div class="chip-bar">
+            <span class="chip-bar-label">Explore ▸</span>
+            <button class="chip" data-chip="size">Size</button>
+            <button class="chip" data-chip="starlight">Starlight</button>
+            <button class="chip" data-chip="first">A first</button>
+            <button class="chip" data-chip="source">Data source</button>
+          </div>
+          <div class="mcq" id="mcq-1">
+            <p class="mcq-q">Which clue makes this planet worth a closer look?</p>
+            <label class="mcq-choice"><input type="radio" name="mcq1" value="A"><span>Its measured size compared to Earth</span></label>
+            <label class="mcq-choice"><input type="radio" name="mcq1" value="B"><span>How much starlight it receives</span></label>
+            <label class="mcq-choice"><input type="radio" name="mcq1" value="C"><span>That thousands more might share its pattern</span></label>
+            <label class="mcq-choice"><input type="radio" name="mcq1" value="D"><span>All of these together</span></label>
+            <button class="check-btn" data-check="1">Check my answer</button>
+            <div class="mcq-feedback" hidden></div>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ STEP 2 ============ -->
+  <section class="step" id="step-2" data-step="2">
+    <div class="step-inner">
+      <div class="viz-col">
+        <div class="viz-frame">
+          <div class="viz-container" id="viz-2" aria-label="The scatter plot filling with thousands of exoplanets"></div>
+          <div class="viz-controls">
+            <button class="util-btn" data-util="zoom-in" title="Zoom in">+</button>
+            <button class="util-btn" data-util="zoom-out" title="Zoom out">−</button>
+            <button class="util-btn" data-util="reset" title="Reset view">⟲</button>
+          </div>
+        </div>
+        <div class="instruction-bar" id="inst-2">Watch one planet become a catalog. Pan and zoom freely.</div>
+      </div>
+      <div class="card-col">
+        <article class="story-card">
+          <div class="step-label">Step 2 of 9</div>
+          <h2>One planet becomes a catalog</h2>
+          <p>A single planet can't tell you whether Earth is ordinary or rare. To judge that, you need
+          company — many worlds, measured the same way and plotted in the same space.</p>
+          <p>Here is 51 Pegasi b again, joined by every confirmed planet with a measured size in NASA's
+          archive. Each dot's height is its <strong>radius</strong>; its position left-to-right is how much
+          <strong>starlight</strong> it gets compared to Earth.</p>
+          <div class="chip-bar">
+            <span class="chip-bar-label">Explore ▸</span>
+            <button class="chip" data-chip="earth">Where's Earth?</button>
+            <button class="chip" data-chip="count">Count</button>
+            <button class="chip" data-chip="axes">Axes</button>
+            <button class="chip" data-chip="source">Data source</button>
+          </div>
+          <div class="mcq" id="mcq-2">
+            <p class="mcq-q">What changes when one planet becomes thousands?</p>
+            <label class="mcq-choice"><input type="radio" name="mcq2" value="A"><span>The chart gets too crowded to mean anything</span></label>
+            <label class="mcq-choice"><input type="radio" name="mcq2" value="B"><span>Patterns across the whole catalog become possible to see</span></label>
+            <label class="mcq-choice"><input type="radio" name="mcq2" value="C"><span>Each individual measurement becomes less accurate</span></label>
+            <label class="mcq-choice"><input type="radio" name="mcq2" value="D"><span>Nothing — one planet tells us just as much</span></label>
+            <button class="check-btn" data-check="2">Check my answer</button>
+            <div class="mcq-feedback" hidden></div>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ STEP 3 ============ -->
+  <section class="step" id="step-3" data-step="3">
+    <div class="step-inner">
+      <div class="viz-col">
+        <div class="viz-frame">
+          <div class="viz-container" id="viz-3" aria-label="Exoplanet scatter plot revealing clumps"></div>
+          <div class="viz-controls">
+            <button class="util-btn" data-util="zoom-in" title="Zoom in">+</button>
+            <button class="util-btn" data-util="zoom-out" title="Zoom out">−</button>
+            <button class="util-btn" data-util="reset" title="Reset view">⟲</button>
+            <button class="util-btn util-layer" data-util="shuffle" title="Compare: scatter the same planets at random">⤨ Shuffle</button>
+          </div>
+        </div>
+        <div class="instruction-bar" id="inst-3">Do the planets spread evenly — or gather into groups?</div>
+      </div>
+      <div class="card-col">
+        <article class="story-card">
+          <div class="step-label">Step 3 of 9</div>
+          <h2>The reveal</h2>
+          <p>Here is the whole catalog. If planets came in every possible combination of size and starlight,
+          the dots would fill the chart evenly.</p>
+          <p>They don't. They gather into <strong>clumps</strong> — a dense band of giant "hot Jupiters,"
+          a crowd of smaller "sub-Neptunes" — while wide regions stay nearly empty. Press <strong>Shuffle</strong>
+          to scatter the same planets at random and watch the structure disappear.</p>
+          <div class="chip-bar">
+            <span class="chip-bar-label">Explore ▸</span>
+            <button class="chip" data-chip="clumps">Clumps</button>
+            <button class="chip" data-chip="compare">Compare</button>
+            <button class="chip" data-chip="earth">Where's Earth?</button>
+            <button class="chip" data-chip="count">Count</button>
+          </div>
+          <div class="mcq" id="mcq-3">
+            <p class="mcq-q">What does the arrangement of dots reveal?</p>
+            <label class="mcq-choice"><input type="radio" name="mcq3" value="A"><span>Planets fill every size-and-starlight combination evenly</span></label>
+            <label class="mcq-choice"><input type="radio" name="mcq3" value="B"><span>The planets gather into clumps, leaving wide regions nearly empty</span></label>
+            <label class="mcq-choice"><input type="radio" name="mcq3" value="C"><span>Every planet is about the same size as Earth</span></label>
+            <label class="mcq-choice"><input type="radio" name="mcq3" value="D"><span>The dots form one evenly spaced grid</span></label>
+            <button class="check-btn" data-check="3">Check my answer</button>
+            <div class="mcq-feedback" hidden></div>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ STEP 4 ============ -->
+  <section class="step" id="step-4" data-step="4">
+    <div class="step-inner">
+      <div class="viz-col">
+        <div class="viz-frame">
+          <div class="viz-container" id="viz-4" aria-label="One planet's full record opened"></div>
+          <div class="viz-controls">
+            <button class="util-btn" data-util="zoom-in" title="Zoom in">+</button>
+            <button class="util-btn" data-util="zoom-out" title="Zoom out">−</button>
+            <button class="util-btn" data-util="reset" title="Reset view">⟲</button>
+          </div>
+        </div>
+        <div class="instruction-bar" id="inst-4">Every dot is a world and a record. Click one to read its fields.</div>
+      </div>
+      <div class="card-col">
+        <article class="story-card">
+          <div class="step-label">Step 4 of 9</div>
+          <div class="expert-tag"><span class="expert-avatar">AR</span><span><strong>Dr. Aki Reyes</strong><br>Exoplanet Astronomer</span></div>
+          <h2>What a planet knows</h2>
+          <p>"We never store just a dot. Each confirmed planet carries a <strong>radius</strong> and often a
+          <strong>mass</strong>, an <strong>orbit</strong> (its period and distance from its star), the
+          <strong>starlight</strong> it receives, and the <strong>method and year</strong> we found it. The
+          chart draws two of those numbers — the rest sit underneath."</p>
+          <p class="fine-print">Every value is a real NASA Archive measurement. Fields left blank were simply
+          never measured for that planet — so we don't invent them.</p>
+          <div class="chip-bar">
+            <span class="chip-bar-label">Explore ▸</span>
+            <button class="chip" data-chip="size">Radius</button>
+            <button class="chip" data-chip="orbit">Orbit</button>
+            <button class="chip" data-chip="method">How found</button>
+            <button class="chip" data-chip="source">Data source</button>
+          </div>
+          <div class="mcq" id="mcq-4">
+            <p class="mcq-q">In this dataset, each planet record encodes…</p>
+            <label class="mcq-choice"><input type="radio" name="mcq4" value="A"><span>Only a size</span></label>
+            <label class="mcq-choice"><input type="radio" name="mcq4" value="B"><span>Size, orbit, starlight, and how and when it was found</span></label>
+            <label class="mcq-choice"><input type="radio" name="mcq4" value="C"><span>Only the year it was discovered</span></label>
+            <label class="mcq-choice"><input type="radio" name="mcq4" value="D"><span>Whether aliens live there</span></label>
+            <button class="check-btn" data-check="4">Check my answer</button>
+            <div class="mcq-feedback" hidden></div>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ STEP 5 ============ -->
+  <section class="step" id="step-5" data-step="5">
+    <div class="step-inner">
+      <div class="viz-col">
+        <div class="viz-frame">
+          <div class="viz-container" id="viz-5" aria-label="Exoplanet scatter for free exploration"></div>
+          <div class="viz-controls">
+            <button class="util-btn" data-util="zoom-in" title="Zoom in">+</button>
+            <button class="util-btn" data-util="zoom-out" title="Zoom out">−</button>
+            <button class="util-btn" data-util="reset" title="Reset view">⟲</button>
+          </div>
+        </div>
+        <div class="instruction-bar" id="inst-5">Pan, zoom, hover. Explore freely — there is no wrong observation here.</div>
+      </div>
+      <div class="card-col">
+        <article class="story-card">
+          <div class="step-label">Step 5 of 9</div>
+          <h2>Notice &amp; wonder</h2>
+          <p>Scientists start with open eyes, not answers. Drag and zoom the chart. Hover dots to read their
+          values. Then tag every shape you can honestly say you see — several answers can be true at once.</p>
+          <div class="chip-bar">
+            <span class="chip-bar-label">Explore ▸</span>
+            <button class="chip" data-chip="clumps">Clumps</button>
+            <button class="chip" data-chip="earth">Where's Earth?</button>
+            <button class="chip" data-chip="compare">Compare</button>
+            <button class="chip" data-chip="count">Count</button>
+          </div>
+          <div class="mcq mcq-multi" id="mcq-5">
+            <p class="mcq-q">Which shapes do you see in the dots? Tag all that apply.</p>
+            <div class="tag-grid">
+              <label class="mcq-choice tag"><input type="checkbox" name="mcq5" value="clump"><span>Clump</span></label>
+              <label class="mcq-choice tag"><input type="checkbox" name="mcq5" value="band"><span>Band</span></label>
+              <label class="mcq-choice tag"><input type="checkbox" name="mcq5" value="gap"><span>Gap</span></label>
+              <label class="mcq-choice tag"><input type="checkbox" name="mcq5" value="empty region"><span>Empty region</span></label>
+              <label class="mcq-choice tag"><input type="checkbox" name="mcq5" value="outliers"><span>Outliers</span></label>
+              <label class="mcq-choice tag"><input type="checkbox" name="mcq5" value="scattered"><span>Scattered</span></label>
+            </div>
+            <button class="check-btn" data-check="5">Save my observations</button>
+            <div class="mcq-feedback" hidden></div>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ STEP 6 ============ -->
+  <section class="step" id="step-6" data-step="6">
+    <div class="step-inner">
+      <div class="viz-col">
+        <div class="viz-frame">
+          <div class="viz-container" id="viz-6" aria-label="Scatter plot with the habitable zone box"></div>
+          <div class="viz-controls">
+            <button class="util-btn" data-util="zoom-in" title="Zoom in">+</button>
+            <button class="util-btn" data-util="zoom-out" title="Zoom out">−</button>
+            <button class="util-btn" data-util="reset" title="Reset view">⟲</button>
+            <button class="util-btn util-layer" data-util="box" title="Show the Earth-like box (rocky size + habitable starlight)">▢ Earth-like box</button>
+          </div>
+        </div>
+        <div class="slider-row">
+          <label for="size-slider">Keep planets smaller than <strong id="size-readout">4.0 R⊕</strong></label>
+          <input type="range" id="size-slider" min="1" max="20" step="0.5" value="20">
+          <span class="slider-count" id="size-count"></span>
+        </div>
+        <div class="instruction-bar" id="inst-6">Draw the Earth-like box, then shrink the size filter. How many planets survive?</div>
+      </div>
+      <div class="card-col">
+        <article class="story-card">
+          <div class="step-label">Step 6 of 9</div>
+          <h2>Filter to the worlds that matter</h2>
+          <p>"Earth-like" has a testable meaning. A planet is a candidate for life if it is roughly
+          <strong>rocky-sized</strong> (about 0.5–1.6 Earth radii) <em>and</em> gets roughly
+          <strong>Earth-like starlight</strong> (0.25–1.5 times Earth's) — not so much that oceans boil, not
+          so little that they freeze. That's the green box.</p>
+          <p>Turn on the box and lower the size filter. The thousands collapse to a small group sitting near
+          Earth's own spot.</p>
+          <div class="chip-bar">
+            <span class="chip-bar-label">Explore ▸</span>
+            <button class="chip" data-chip="box">Earth-like box</button>
+            <button class="chip" data-chip="earth">Where's Earth?</button>
+            <button class="chip" data-chip="count">Count inside</button>
+            <button class="chip" data-chip="clumps">Clumps</button>
+          </div>
+          <div class="mcq" id="mcq-6">
+            <p class="mcq-q"><span class="evidence-flag">Visual evidence check</span> Turn on the Earth-like box, then answer: how many planets fall inside it?</p>
+            <label class="mcq-choice"><input type="radio" name="mcq6" value="A"><span>About half of all known planets</span></label>
+            <label class="mcq-choice"><input type="radio" name="mcq6" value="B"><span>Only a small handful, clustered near Earth's spot</span></label>
+            <label class="mcq-choice"><input type="radio" name="mcq6" value="C"><span>None at all — the box is empty</span></label>
+            <label class="mcq-choice"><input type="radio" name="mcq6" value="D"><span>Every planet in the catalog</span></label>
+            <button class="check-btn" data-check="6">Check evidence</button>
+            <div class="mcq-feedback" hidden></div>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ STEP 7 ============ -->
+  <section class="step" id="step-7" data-step="7">
+    <div class="step-inner">
+      <div class="viz-col">
+        <div class="viz-frame">
+          <div class="viz-container" id="viz-7" aria-label="Histogram of planet sizes"></div>
+        </div>
+        <div class="instruction-bar" id="inst-7">Read the histogram left to right. Where do the bars tower — and where does Earth's size land?</div>
+      </div>
+      <div class="card-col">
+        <article class="story-card">
+          <div class="step-label">Step 7 of 9</div>
+          <h2>The distribution lens</h2>
+          <p>Leave the scatter for a moment. Count how many planets fall in each size range and stack them
+          into a histogram. Grouping by a variable — here, radius — is one of the most powerful moves in
+          analysis.</p>
+          <p>The bars tower in the "super-Earth to Neptune" range. Earth-sized worlds (near 1 R⊕) are a
+          <strong>minority</strong>, not the norm — at least among the planets we've managed to find.</p>
+          <div class="chip-bar">
+            <span class="chip-bar-label">Explore ▸</span>
+            <button class="chip" data-chip="axes">Axes</button>
+            <button class="chip" data-chip="bars">Bars</button>
+            <button class="chip" data-chip="earthbar">Earth's size</button>
+            <button class="chip" data-chip="count">Count</button>
+          </div>
+          <div class="mcq" id="mcq-7">
+            <p class="mcq-q">What does this size histogram tell us?</p>
+            <label class="mcq-choice"><input type="radio" name="mcq7" value="A"><span>Most known planets are Earth-sized</span></label>
+            <label class="mcq-choice"><input type="radio" name="mcq7" value="B"><span>Earth-sized planets are a minority; bigger super-Earths and Neptunes dominate the catalog</span></label>
+            <label class="mcq-choice"><input type="radio" name="mcq7" value="C"><span>All planets are larger than Neptune</span></label>
+            <label class="mcq-choice"><input type="radio" name="mcq7" value="D"><span>Planet sizes are spread perfectly evenly</span></label>
+            <button class="check-btn" data-check="7">Check my answer</button>
+            <div class="mcq-feedback" hidden></div>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ STEP 8 ============ -->
+  <section class="step" id="step-8" data-step="8">
+    <div class="step-inner">
+      <div class="viz-col">
+        <div class="viz-frame">
+          <div class="viz-container" id="viz-8" aria-label="Scatter plot colored by discovery method"></div>
+          <div class="viz-controls">
+            <button class="util-btn" data-util="reset" title="Reset view">⟲</button>
+            <button class="util-btn util-layer" data-util="method" title="Color planets by how they were discovered">Color by method</button>
+          </div>
+        </div>
+        <div class="instruction-bar" id="inst-8">Color the dots by how each planet was found. Does the method shape what we see?</div>
+      </div>
+      <div class="card-col">
+        <article class="story-card">
+          <div class="step-label">Step 8 of 9</div>
+          <h2>Why does the catalog look like this?</h2>
+          <p>Here's the twist a good data scientist always checks: a pattern can come from the world
+          <em>or</em> from how we measured it. Color each planet by its <strong>discovery method</strong> and
+          a bias appears — our main techniques find <strong>big planets close to their stars</strong> most
+          easily, because those block more light and tug their stars harder.</p>
+          <p>So the empty "Earth-like" corner is partly real and partly a <strong>blind spot</strong>: small,
+          temperate worlds are simply the hardest to detect. Reading data means asking how it was collected.</p>
+          <div class="chip-bar">
+            <span class="chip-bar-label">Explore ▸</span>
+            <button class="chip" data-chip="method">By method</button>
+            <button class="chip" data-chip="transit">Transit</button>
+            <button class="chip" data-chip="rv">Radial velocity</button>
+            <button class="chip" data-chip="bias">Blind spot</button>
+          </div>
+          <div class="mcq" id="mcq-8">
+            <p class="mcq-q">Why are there so few Earth-like planets in the data?</p>
+            <label class="mcq-choice"><input type="radio" name="mcq8" value="A"><span>Earth-like planets definitely don't exist elsewhere</span></label>
+            <label class="mcq-choice"><input type="radio" name="mcq8" value="B"><span>Partly they're rare in our sample, and partly small temperate worlds are the hardest to detect</span></label>
+            <label class="mcq-choice"><input type="radio" name="mcq8" value="C"><span>Astronomers simply forgot to look for them</span></label>
+            <label class="mcq-choice"><input type="radio" name="mcq8" value="D"><span>The discovery method makes no difference at all</span></label>
+            <button class="check-btn" data-check="8">Check my answer</button>
+            <div class="mcq-feedback" hidden></div>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ STEP 9 ============ -->
+  <section class="step" id="step-9" data-step="9">
+    <div class="step-inner">
+      <div class="viz-col">
+        <div class="viz-frame">
+          <div class="viz-container" id="viz-9" aria-label="Scatter plot with the habitable candidates highlighted"></div>
+          <div class="viz-controls">
+            <button class="util-btn" data-util="zoom-in" title="Zoom in">+</button>
+            <button class="util-btn" data-util="zoom-out" title="Zoom out">−</button>
+            <button class="util-btn" data-util="reset" title="Reset view">⟲</button>
+            <button class="util-btn util-layer" data-util="reveal" title="Spotlight the Earth-like candidates">★ Spotlight candidates</button>
+          </div>
+        </div>
+        <div class="instruction-bar" id="inst-9">The evidence points to a small, precious group. Make the claim, then spotlight them.</div>
+      </div>
+      <div class="card-col">
+        <article class="story-card">
+          <div class="step-label">Step 9 of 9</div>
+          <h2>Name the finding: rare, but not zero</h2>
+          <p>Out of thousands of confirmed worlds, only a small group sits in the Earth-like box — rocky-sized
+          and bathed in Earth-like starlight. They are humanity's first real shortlist of places that
+          <em>could</em> host liquid water, and the next great telescopes are aimed straight at them.</p>
+          <p>Now make it yours. Write a claim that uses <strong>one shape word</strong> (clump, box, band,
+          gap…) and <strong>one number or pattern observation</strong> (a count, "most", "rare"…).</p>
+          <div class="chip-bar">
+            <span class="chip-bar-label">Explore ▸</span>
+            <button class="chip" data-chip="box">Earth-like box</button>
+            <button class="chip" data-chip="count">Count inside</button>
+            <button class="chip" data-chip="earth">Where's Earth?</button>
+            <button class="chip" data-chip="bias">Blind spot</button>
+          </div>
+          <div class="mcq" id="mcq-9">
+            <p class="mcq-q"><span class="evidence-flag">Visual evidence check</span> Your claim:</p>
+            <textarea id="claim-text" rows="4" placeholder="Example shape: “Only a small clump of planets sits inside the Earth-like box — about ___ of the thousands we've found — use the Count chip to fill in the number.”"></textarea>
+            <div class="claim-hints">
+              <span class="hint-pill" data-hint="clump">clump</span>
+              <span class="hint-pill" data-hint="box">box</span>
+              <span class="hint-pill" data-hint="band">band</span>
+              <span class="hint-pill" data-hint="gap">gap</span>
+            </div>
+            <button class="check-btn" data-check="9">Check evidence</button>
+            <div class="mcq-feedback" hidden></div>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<section class="lesson-end" id="lesson-end">
+  <p class="end-kicker">Search complete</p>
+  <h2>You found the shortlist for life.</h2>
+  <p>You started from one scorched giant and built a full evidence chain — the same moves astronomers use to
+  turn a sky full of dots into a map of possible worlds.</p>
+  <ul class="end-recap">
+    <li>A single planet became a <strong>catalog</strong> of thousands of real NASA records.</li>
+    <li>The planets weren't spread evenly — they gathered into <strong>clumps</strong>.</li>
+    <li>Every record carries <strong>size, orbit, starlight, and how it was found</strong>.</li>
+    <li>An <strong>Earth-like box</strong> (rocky size + habitable starlight) filtered thousands down to a handful.</li>
+    <li>A histogram showed Earth-sized worlds are a <strong>minority</strong> of the catalog.</li>
+    <li>Coloring by method revealed a <strong>detection blind spot</strong>: small temperate worlds are hardest to find.</li>
+    <li>The finding: potentially habitable worlds are <strong>rare, but not zero</strong>.</li>
+  </ul>
+  <div class="end-claim" id="end-claim" hidden>
+    <div class="end-claim-label">Your evidence-based claim</div>
+    <blockquote id="end-claim-text"></blockquote>
+  </div>
+  <div class="end-actions">
+    <button class="end-btn secondary" id="end-top">Back to the top</button>
+    <button class="end-btn" id="end-restart">Start over</button>
+  </div>
+</section>
+
+<footer class="lesson-footer">
+  <p>Savvas Data Show · classroom prototype · planet data: <strong>NASA Exoplanet Archive</strong>
+  (pscomppars confirmed-planet table). Part of the Data Show series ·
+  <a href="../" style="color:#1B5FAA">← Mapping the Ring of Fire (earthquakes)</a> ·
+  <a href="../cholera/" style="color:#1B5FAA">The Broad Street Pump (cholera) →</a>.</p>
+</footer>
+
+<div class="map-tooltip" id="map-tooltip" hidden></div>
+
+<div class="celebrate-toast" id="celebrate-toast" hidden></div>
+
+<div class="scroll-fade" id="scroll-fade" aria-hidden="true">
+  <div class="scroll-cue"><span>⌄</span>scroll</div>
+</div>
+
+<div id="audio-rack" hidden>
+  <audio id="audio-1" src="assets/audio/step1.mp3" preload="none"></audio>
+  <audio id="audio-2" src="assets/audio/step2.mp3" preload="none"></audio>
+  <audio id="audio-3" src="assets/audio/step3.mp3" preload="none"></audio>
+  <audio id="audio-4" src="assets/audio/step4.mp3" preload="none"></audio>
+  <audio id="audio-5" src="assets/audio/step5.mp3" preload="none"></audio>
+  <audio id="audio-6" src="assets/audio/step6.mp3" preload="none"></audio>
+  <audio id="audio-7" src="assets/audio/step7.mp3" preload="none"></audio>
+  <audio id="audio-8" src="assets/audio/step8.mp3" preload="none"></audio>
+  <audio id="audio-9" src="assets/audio/step9.mp3" preload="none"></audio>
+</div>
+
+<script src="d3.v7.min.js"></script>
+<script src="data/planets.js"></script>
+<script src="app.js?v=1"></script>
+</body>
+</html>
