@@ -156,7 +156,8 @@
     pane.innerHTML = '';
     var nums = COLS.filter(isNumCol), cats = COLS.filter(function (c) { return c.type !== 'number'; });
     var d = (cfg.defaults && cfg.defaults.chart) || {};
-    var st = { type: d.type || (nums.length >= 2 ? 'scatter' : 'histogram'), x: d.x || (nums[0] && nums[0].key), y: d.y || (nums[1] && nums[1].key), color: d.color || '', agg: d.agg || 'count' };
+    var st = { type: d.type || (nums.length >= 2 ? 'scatter' : 'histogram'), x: d.x || (nums[0] && nums[0].key), y: d.y || (nums[1] && nums[1].key),
+      color: d.color || '', agg: d.agg || 'count', xs: 'auto', ys: 'auto', bins: 24, fit: false };
 
     var ctrls = el('div', 'dx-controls');
     function sel(label, opts, cur, on) {
@@ -164,8 +165,10 @@
       opts.forEach(function (o) { var op = el('option'); op.value = o.v; op.textContent = o.t; if (o.v === cur) op.selected = true; s.appendChild(op); });
       s.onchange = function () { on(s.value); }; c.appendChild(s); return c;
     }
+    function check(label, cur, on) { var c = el('label', 'dx-ctl', ''); var i = el('input'); i.type = 'checkbox'; i.checked = cur; i.onchange = function () { on(i.checked); }; c.insertBefore(i, null); c.appendChild(document.createTextNode(' ' + label)); return c; }
     function colOpts(list, allowNone) { var o = list.map(function (c) { return { v: c.key, t: c.label }; }); if (allowNone) o.unshift({ v: '', t: '(none)' }); return o; }
-    var plot = el('div', 'dx-plot'); var legend = el('div', 'dx-legend');
+    var SCALES = [{ v: 'auto', t: 'auto' }, { v: 'linear', t: 'linear' }, { v: 'log', t: 'log' }];
+    var plot = el('div', 'dx-plot'); var legend = el('div', 'dx-legend'); var note = el('div', 'dx-note');
 
     function rebuildControls() {
       ctrls.innerHTML = '';
@@ -174,19 +177,33 @@
         ctrls.appendChild(sel('Group by', colOpts(COLS), st.x, function (v) { st.x = v; draw(); }));
         ctrls.appendChild(sel('Value', colOpts(nums), st.y, function (v) { st.y = v; draw(); }));
         ctrls.appendChild(sel('Aggregate', [{ v: 'count', t: 'Count' }, { v: 'mean', t: 'Mean' }, { v: 'sum', t: 'Sum' }, { v: 'min', t: 'Min' }, { v: 'max', t: 'Max' }, { v: 'median', t: 'Median' }], st.agg, function (v) { st.agg = v; draw(); }));
+        ctrls.appendChild(sel('Y scale', SCALES, st.ys, function (v) { st.ys = v; draw(); }));
       } else if (st.type === 'histogram') {
         ctrls.appendChild(sel('Value', colOpts(nums), st.x, function (v) { st.x = v; draw(); }));
+        ctrls.appendChild(sel('Bins', [{ v: 12, t: '12' }, { v: 24, t: '24' }, { v: 48, t: '48' }, { v: 80, t: '80' }], st.bins, function (v) { st.bins = +v; draw(); }));
+        ctrls.appendChild(sel('X scale', SCALES, st.xs, function (v) { st.xs = v; draw(); }));
+        ctrls.appendChild(sel('Y scale', SCALES, st.ys, function (v) { st.ys = v; draw(); }));
       } else {
         ctrls.appendChild(sel('X', colOpts(nums), st.x, function (v) { st.x = v; draw(); }));
         ctrls.appendChild(sel('Y', colOpts(nums), st.y, function (v) { st.y = v; draw(); }));
+        ctrls.appendChild(sel('X scale', SCALES, st.xs, function (v) { st.xs = v; draw(); }));
+        ctrls.appendChild(sel('Y scale', SCALES, st.ys, function (v) { st.ys = v; draw(); }));
         if (st.type === 'scatter' && cats.length) ctrls.appendChild(sel('Color by', colOpts(cats, true), st.color, function (v) { st.color = v; draw(); }));
+        if (st.type === 'scatter') ctrls.appendChild(check('Fit line', st.fit, function (v) { st.fit = v; draw(); }));
       }
     }
-    pane.appendChild(ctrls); pane.appendChild(plot); pane.appendChild(legend);
+    pane.appendChild(ctrls); pane.appendChild(plot); pane.appendChild(legend); pane.appendChild(note);
 
-    function logOK(vals) { return d3.min(vals) > 0 && (d3.max(vals) / d3.min(vals) > 1000); }
+    // choose a scale: explicit linear/log, or 'auto' (log when all-positive & spans >1000x)
+    function makeScale(vals, mode, range) {
+      var positive = vals.length && d3.min(vals) > 0;
+      var useLog = positive && (mode === 'log' || (mode === 'auto' && d3.max(vals) / d3.min(vals) > 1000));
+      var forcedLog = mode === 'log' && !positive;   // user asked log but data has ≤0
+      var s = (useLog ? d3.scaleLog() : d3.scaleLinear()).domain(vals.length ? d3.extent(vals) : [0, 1]).range(range).nice();
+      return { scale: s, log: useLog, forcedLogFail: forcedLog };
+    }
     function draw() {
-      plot.innerHTML = ''; legend.innerHTML = '';
+      plot.innerHTML = ''; legend.innerHTML = ''; note.innerHTML = '';
       var W = plot.clientWidth || 860, H = 420, M = { t: 16, r: 18, b: 54, l: 64 };
       var iw = W - M.l - M.r, ih = H - M.t - M.b;
       var svg = d3.select(plot).append('svg').attr('viewBox', '0 0 ' + W + ' ' + H);
@@ -198,14 +215,26 @@
         g.append('text').attr('x', -ih / 2).attr('y', -48).attr('transform', 'rotate(-90)').attr('text-anchor', 'middle').attr('font-size', 12).attr('fill', '#5A6470').text(yl);
       }
       var cx = colByKey(st.x), cy = colByKey(st.y);
+      var nameCol = cats[0] || null;
+      function lab(c) { return c.label + (c.unit ? ' (' + c.unit + ')' : ''); }
+      function ptTitle(r, c1, c2) { var p = []; if (nameCol && nameCol !== c1 && nameCol !== c2) p.push(val(nameCol, r)); if (c1) p.push(c1.label + ': ' + fmt(val(c1, r))); if (c2) p.push(c2.label + ': ' + fmt(val(c2, r))); return p.join('\n'); }
+      var notes = [];
 
       if (st.type === 'scatter' || st.type === 'line') {
         if (!cx || !cy) { plot.innerHTML = '<div class="dx-empty">Pick an X and Y column.</div>'; return; }
+        var total = ROWS.length;
         var pts = ROWS.map(function (r) { return { x: +val(cx, r), y: +val(cy, r), r: r }; }).filter(function (p) { return isFinite(p.x) && isFinite(p.y); });
-        var xv = pts.map(function (p) { return p.x; }), yv = pts.map(function (p) { return p.y; });
-        var x = (logOK(xv) ? d3.scaleLog() : d3.scaleLinear()).domain(d3.extent(xv)).range([0, iw]).nice();
-        var y = (logOK(yv) ? d3.scaleLog() : d3.scaleLinear()).domain(d3.extent(yv)).range([ih, 0]).nice();
-        axes(x, y, cx.label + (cx.unit ? ' (' + cx.unit + ')' : ''), cy.label + (cy.unit ? ' (' + cy.unit + ')' : ''));
+        var missing = total - pts.length;
+        var sx = makeScale(pts.map(function (p) { return p.x; }), st.xs, [0, iw]);
+        var sy = makeScale(pts.map(function (p) { return p.y; }), st.ys, [ih, 0]);
+        // on a log axis, drop non-positive points so they don't vanish silently
+        var dropped = 0;
+        if (sx.log) { var b = pts.length; pts = pts.filter(function (p) { return p.x > 0; }); dropped += b - pts.length; }
+        if (sy.log) { var b2 = pts.length; pts = pts.filter(function (p) { return p.y > 0; }); dropped += b2 - pts.length; }
+        if (sx.log) sx.scale.domain(d3.extent(pts, function (p) { return p.x; })).nice();
+        if (sy.log) sy.scale.domain(d3.extent(pts, function (p) { return p.y; })).nice();
+        var x = sx.scale, y = sy.scale;
+        axes(x, y, lab(cx), lab(cy));
         if (st.type === 'line') {
           pts.sort(function (a, b) { return a.x - b.x; });
           g.append('path').datum(pts).attr('fill', 'none').attr('stroke', '#1B5FAA').attr('stroke-width', 1.6).attr('d', d3.line().x(function (p) { return x(p.x); }).y(function (p) { return y(p.y); }));
@@ -213,21 +242,44 @@
           var ccol = st.color ? colByKey(st.color) : null;
           var palette = ['#1B5FAA', '#E8704F', '#1E7D45', '#9C6FB8', '#E2A33D', '#3B82C4', '#C0392B', '#7A828C'];
           var keys = ccol ? groupKeys(ccol).slice(0, 8).map(function (k) { return k.key; }) : [];
-          g.selectAll('circle').data(pts).join('circle').attr('cx', function (p) { return x(p.x); }).attr('cy', function (p) { return y(p.y); }).attr('r', 2.3).attr('fill-opacity', .5)
-            .attr('fill', function (p) { if (!ccol) return '#1B5FAA'; var k = val(ccol, p.r); k = (k == null || k === '') ? '(none)' : k; var i = keys.indexOf(k); return i < 0 ? '#7A828C' : palette[i % palette.length]; });
+          g.selectAll('circle').data(pts).join('circle').attr('cx', function (p) { return x(p.x); }).attr('cy', function (p) { return y(p.y); }).attr('r', pts.length > 2500 ? 1.8 : 2.4).attr('fill-opacity', pts.length > 2500 ? .4 : .55)
+            .attr('fill', function (p) { if (!ccol) return '#1B5FAA'; var k = val(ccol, p.r); k = (k == null || k === '') ? '(none)' : k; var i = keys.indexOf(k); return i < 0 ? '#7A828C' : palette[i % palette.length]; })
+            .append('title').text(function (p) { return ptTitle(p.r, cx, cy); });
           if (ccol) keys.forEach(function (k, i) { legend.appendChild(el('span', null, '<i style="background:' + palette[i % palette.length] + '"></i>' + k)); });
+          if (st.fit && pts.length > 1) {
+            var n = pts.length, sX = 0, sY = 0, sXX = 0, sXY = 0;
+            pts.forEach(function (p) { sX += p.x; sY += p.y; sXX += p.x * p.x; sXY += p.x * p.y; });
+            var den = n * sXX - sX * sX;
+            if (den !== 0) {
+              var slope = (n * sXY - sX * sY) / den, b3 = (sY - slope * sX) / n;
+              var ex = d3.extent(pts, function (p) { return p.x; }), steps = 32, fitPts = [];
+              for (var i2 = 0; i2 <= steps; i2++) { var xx = ex[0] + (ex[1] - ex[0]) * i2 / steps; fitPts.push({ x: xx, y: slope * xx + b3 }); }
+              g.append('path').datum(fitPts).attr('fill', 'none').attr('stroke', '#E8704F').attr('stroke-width', 2).attr('stroke-dasharray', '6 4').attr('d', d3.line().x(function (p) { return x(p.x); }).y(function (p) { return y(p.y); }));
+              var r2 = pearson(pts); notes.push('fit: y = ' + fmt(slope) + '·x + ' + fmt(b3) + ' · r = ' + r2.toFixed(2));
+            }
+          }
         }
-        plot.querySelector('svg').insertAdjacentHTML('beforeend', '');
-        g.selectAll('circle').append('title');
+        if (missing) notes.push(missing.toLocaleString() + ' rows missing ' + cx.label + ' or ' + cy.label);
+        if (dropped) notes.push(dropped.toLocaleString() + ' non-positive dropped for log axis');
+        if (sx.forcedLogFail) notes.push('X has ≤0 values — log not applied');
+        if (sy.forcedLogFail) notes.push('Y has ≤0 values — log not applied');
       } else if (st.type === 'histogram') {
         if (!cx) { plot.innerHTML = '<div class="dx-empty">Pick a value column.</div>'; return; }
         var vals = numVals(cx); if (!vals.length) { plot.innerHTML = '<div class="dx-empty">No numeric values.</div>'; return; }
-        var x2 = d3.scaleLinear().domain(d3.extent(vals)).range([0, iw]).nice();
-        var bins = d3.bin().domain(x2.domain()).thresholds(24)(vals);
-        var y2 = d3.scaleLinear().domain([0, d3.max(bins, function (b) { return b.length; })]).range([ih, 0]).nice();
-        axes(x2, y2, cx.label + (cx.unit ? ' (' + cx.unit + ')' : ''), 'count');
-        g.selectAll('rect').data(bins).join('rect').attr('x', function (b) { return x2(b.x0) + 1; }).attr('y', function (b) { return y2(b.length); })
-          .attr('width', function (b) { return Math.max(0, x2(b.x1) - x2(b.x0) - 1.5); }).attr('height', function (b) { return ih - y2(b.length); }).attr('fill', '#1B5FAA').attr('fill-opacity', .82);
+        var sxh = makeScale(vals, st.xs, [0, iw]);
+        var vv = sxh.log ? vals.filter(function (v) { return v > 0; }) : vals;
+        if (sxh.log) sxh.scale.domain(d3.extent(vv)).nice();
+        var x2 = sxh.scale;
+        var thresholds = sxh.log ? x2.ticks(st.bins) : st.bins;
+        var bins = d3.bin().domain(x2.domain()).thresholds(thresholds)(vv);
+        var counts = bins.map(function (b) { return b.length; });
+        var sy2 = makeScale(counts.filter(function (c) { return c > 0; }), st.ys, [ih, 0]); sy2.scale.domain([sy2.log ? 1 : 0, d3.max(counts) || 1]).nice();
+        var y2 = sy2.scale;
+        axes(x2, y2, lab(cx), 'count');
+        g.selectAll('rect').data(bins).join('rect').attr('x', function (b) { return x2(b.x0) + 1; }).attr('y', function (b) { return y2(Math.max(b.length, sy2.log ? 1 : 0)); })
+          .attr('width', function (b) { return Math.max(0, x2(b.x1) - x2(b.x0) - 1.5); }).attr('height', function (b) { return Math.max(0, ih - y2(Math.max(b.length, sy2.log ? 1 : 0))); }).attr('fill', '#1B5FAA').attr('fill-opacity', .82)
+          .append('title').text(function (b) { return fmt(b.x0) + '–' + fmt(b.x1) + ': ' + b.length; });
+        if (sxh.log) notes.push(vals.length - vv.length + ' non-positive dropped for log axis');
       } else if (st.type === 'bar') {
         var gc = colByKey(st.x); if (!gc) { plot.innerHTML = '<div class="dx-empty">Pick a group-by column.</div>'; return; }
         var vc = colByKey(st.y);
@@ -237,13 +289,22 @@
         });
         if (gc.type === 'category') groups.sort(function (a, b) { return b.v - a.v; });
         var xb = d3.scaleBand().domain(groups.map(function (d2) { return d2.key; })).range([0, iw]).padding(.18);
-        var yb = d3.scaleLinear().domain([0, d3.max(groups, function (d2) { return d2.v; }) || 1]).range([ih, 0]).nice();
+        var syb = makeScale(groups.map(function (d2) { return d2.v; }).filter(function (v) { return v > 0; }), st.ys, [ih, 0]);
+        syb.scale.domain([syb.log ? (d3.min(groups.filter(function (d2) { return d2.v > 0; }), function (d2) { return d2.v; }) || 1) : 0, d3.max(groups, function (d2) { return d2.v; }) || 1]).nice();
+        var yb = syb.scale, base = syb.log ? yb.range()[0] : ih;
         g.append('g').attr('transform', 'translate(0,' + ih + ')').call(d3.axisBottom(xb)).selectAll('text').attr('font-size', 9).attr('transform', 'rotate(-35)').attr('text-anchor', 'end');
-        g.append('g').call(d3.axisLeft(yb).ticks(7));
+        g.append('g').call(d3.axisLeft(yb).ticks(7, '~g'));
         g.append('text').attr('x', -ih / 2).attr('y', -48).attr('transform', 'rotate(-90)').attr('text-anchor', 'middle').attr('font-size', 12).attr('fill', '#5A6470').text(st.agg + (st.agg === 'count' ? '' : ' of ' + (vc ? vc.label : '')));
-        g.selectAll('rect').data(groups).join('rect').attr('x', function (d2) { return xb(d2.key); }).attr('width', xb.bandwidth()).attr('y', function (d2) { return yb(d2.v); }).attr('height', function (d2) { return ih - yb(d2.v); }).attr('fill', '#1B5FAA').attr('fill-opacity', .85)
+        g.selectAll('rect').data(groups).join('rect').attr('x', function (d2) { return xb(d2.key); }).attr('width', xb.bandwidth()).attr('y', function (d2) { return d2.v > 0 ? yb(d2.v) : base; }).attr('height', function (d2) { return d2.v > 0 ? Math.max(0, base - yb(d2.v)) : 0; }).attr('fill', '#1B5FAA').attr('fill-opacity', .85)
           .append('title').text(function (d2) { return d2.key + ': ' + fmt(d2.v); });
       }
+      note.innerHTML = notes.join(' · ');
+    }
+    function pearson(pts) {
+      var n = pts.length, sX = 0, sY = 0, sXX = 0, sYY = 0, sXY = 0;
+      pts.forEach(function (p) { sX += p.x; sY += p.y; sXX += p.x * p.x; sYY += p.y * p.y; sXY += p.x * p.y; });
+      var num = n * sXY - sX * sY, den = Math.sqrt((n * sXX - sX * sX) * (n * sYY - sY * sY));
+      return den ? num / den : 0;
     }
     rebuildControls(); draw();
   }
