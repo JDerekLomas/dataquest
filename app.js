@@ -1757,7 +1757,7 @@
     var fill = document.getElementById('progress-fill');
     if (fill) { fill.classList.remove('pulse'); void fill.offsetWidth; fill.classList.add('pulse'); }
 
-    if (ok && (n === 9 || doneCount === 9)) { showToast("Case closed — you mapped Earth's anger.", 'good'); confettiBurst(); return; }
+    if (ok && (n === 9 || doneCount === 9)) { showToast("Case closed — you mapped the Ring of Fire.", 'good'); confettiBurst(); return; }
     if (!ok) { showToast('Answer revealed — Step ' + n + ' logged. Keep going.', 'muted'); return; }
 
     var msg;
@@ -1804,6 +1804,18 @@
     if (!sel) { setInst(n, 'Pick an answer first, then check it.', 'warn'); return; }
     if (n === 6 && (!ctxs[6] || ctxs[6].sliderMax < 7)) {
       setInst(6, 'Evidence first: move the slider to M7.0 or higher and watch the map, then check your answer.', 'error');
+      return;
+    }
+    if (sel.value !== ANSWERS[n]) {
+      // wrong: leave the question open so the student can try again — never a dead end
+      streak = 0;
+      mcq.querySelectorAll('.mcq-choice').forEach(function (lab) { lab.classList.remove('incorrect'); });
+      sel.closest('.mcq-choice').classList.add('incorrect');
+      var fb = mcq.querySelector('.mcq-feedback');
+      fb.hidden = false; fb.className = 'mcq-feedback bad';
+      fb.innerHTML = '<strong>Not quite — try again.</strong> ' + (FB[n] ? FB[n].no : '');
+      btn.textContent = 'Try again';
+      setInst(n, FB[n] ? FB[n].no : 'Look at the map again, then re-check.', 'error');
       return;
     }
     state.answers[n] = sel.value;
@@ -2028,7 +2040,7 @@
     if (v === undefined || v === null) continue;
     if (rn === 5) renderTags(v, true);
     else if (rn === 9) renderClaimAccepted(true);
-    else renderGradeRadio(rn, v, true);
+    else if (v === ANSWERS[rn]) renderGradeRadio(rn, v, true);
   }
 
   /* ---------- progressive scroll gate ----------
@@ -2141,14 +2153,21 @@
     var panel = document.createElement('div');
     panel.className = 'review-panel';
     panel.innerHTML =
-      '<div class="review-head"><span><strong>Reviewer feedback</strong>' +
-      '<span class="review-badge" id="rv-badge">0</span></span><span id="rv-toggle">▾</span></div>' +
+      '<div class="review-head">' +
+        '<span class="review-icon">✎</span>' +
+        '<span class="review-title"><strong>Reviewer feedback</strong><small>Comments save automatically</small></span>' +
+        '<span class="review-badge" id="rv-badge">0</span>' +
+        '<span class="review-toggle" id="rv-toggle">▾</span>' +
+      '</div>' +
       '<div class="review-body">' +
-      '<div class="review-step-label">Commenting on <strong id="rv-step">Step 1</strong></div>' +
-      '<textarea id="rv-text" placeholder="What works, what to change on this step…"></textarea>' +
-      '<div class="review-saved" id="rv-saved"></div>' +
-      '<div class="review-actions"><button class="secondary" id="rv-export">Export all</button>' +
-      '<button id="rv-clear">Clear step</button></div></div>';
+        '<span class="review-step-chip" id="rv-step">Step 1</span>' +
+        '<textarea id="rv-text" placeholder="What works here? What should change? Type your notes for this step…"></textarea>' +
+        '<div class="review-foot">' +
+          '<span class="review-saved" id="rv-saved"></span>' +
+          '<button class="rv-clear" id="rv-clear">Clear</button>' +
+          '<button class="rv-export" id="rv-export">Export all</button>' +
+        '</div>' +
+      '</div>';
     document.body.appendChild(panel);
 
     var toggle = panel.querySelector('#rv-toggle');
@@ -2191,7 +2210,7 @@
       updateBadge();
     });
     panel.querySelector('#rv-export').addEventListener('click', function () {
-      var out = { lesson: "Map Earth's Anger", exported: new Date().toISOString(), comments: {} };
+      var out = { lesson: "Mapping the Ring of Fire", exported: new Date().toISOString(), comments: {} };
       for (var n = 1; n <= 9; n++) {
         if ((comments[n] || '').trim()) out.comments['step' + n] = { title: stepTitle(n), comment: comments[n] };
       }

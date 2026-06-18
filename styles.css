@@ -527,33 +527,51 @@ button { font-family: inherit; cursor: pointer; }
 
 /* ---------- Review mode panel ---------- */
 .review-panel {
-  position: fixed; right: 16px; bottom: 16px; z-index: 95;
-  width: 320px; max-width: calc(100vw - 32px);
-  background: var(--card); border: 1px solid #C9D1DA; border-radius: 10px;
-  box-shadow: 0 8px 30px rgba(31,41,51,0.18);
+  position: fixed; right: 18px; bottom: 18px; z-index: 95;
+  width: 344px; max-width: calc(100vw - 36px);
+  background: var(--card); border: 1px solid #D4DAE2; border-radius: 14px;
+  box-shadow: 0 14px 44px rgba(31,41,51,0.22);
   font-size: 14px; overflow: hidden;
 }
 .review-head {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 10px 14px; background: var(--ink); color: #fff; cursor: pointer;
+  display: flex; align-items: center; gap: 10px;
+  padding: 13px 16px; cursor: pointer;
+  background: linear-gradient(135deg, #1B5FAA, #134878); color: #fff;
 }
-.review-head strong { font-size: 13px; letter-spacing: 0.03em; }
-.review-head .review-badge { font-size: 11px; background: rgba(255,255,255,0.2); border-radius: 999px; padding: 2px 8px; margin-left: 8px; }
-.review-body { padding: 14px; display: grid; gap: 10px; }
+.review-head .review-icon { font-size: 15px; opacity: 0.9; }
+.review-title { display: flex; flex-direction: column; line-height: 1.25; min-width: 0; }
+.review-title strong { font-size: 13.5px; font-weight: 600; }
+.review-title small { font-size: 11px; opacity: 0.78; }
+.review-badge {
+  margin-left: auto; font-size: 11px; font-weight: 600;
+  background: rgba(255,255,255,0.22); border-radius: 999px; padding: 2px 9px;
+}
+.review-toggle { font-size: 12px; opacity: 0.85; width: 14px; text-align: center; }
+
+.review-body { padding: 16px; display: grid; gap: 12px; }
+.review-panel.collapsed { width: auto; }
 .review-panel.collapsed .review-body { display: none; }
-.review-step-label { font-size: 12px; color: var(--ink-faint); }
-.review-step-label strong { color: var(--ink); }
+.review-panel.collapsed .review-title small { display: none; }
+.review-panel.collapsed .review-badge { margin-left: 6px; }
+
+.review-step-chip {
+  justify-self: start;
+  background: #EAF2FB; color: var(--primary); border: 1px solid #CBDDF0;
+  font-size: 12px; font-weight: 600; padding: 4px 11px; border-radius: 999px;
+}
 .review-body textarea {
-  width: 100%; min-height: 80px; resize: vertical; padding: 9px 11px;
-  border: 1px solid #C9D1DA; border-radius: 6px; font: inherit; font-size: 13px;
+  width: 100%; min-height: 100px; resize: vertical; padding: 11px 12px;
+  border: 1px solid #C9D1DA; border-radius: 9px; font: inherit; font-size: 13.5px;
+  line-height: 1.45; color: var(--ink);
 }
-.review-actions { display: flex; gap: 8px; }
-.review-actions button {
-  flex: 1; font-size: 13px; font-weight: 600; padding: 8px 10px; border-radius: 6px; cursor: pointer;
-  border: 1px solid var(--primary); background: var(--primary); color: #fff;
-}
-.review-actions button.secondary { background: #fff; color: var(--primary); }
-.review-saved { font-size: 11px; color: var(--success); min-height: 14px; }
+.review-body textarea:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(27,95,170,0.12); }
+.review-foot { display: flex; align-items: center; gap: 9px; }
+.review-saved { font-size: 11.5px; color: var(--success); flex: 1; min-height: 14px; }
+.review-foot button { font-size: 13px; font-weight: 600; padding: 8px 14px; border-radius: 8px; cursor: pointer; border: 1px solid transparent; }
+.rv-export { background: var(--primary); color: #fff; }
+.rv-export:hover { background: var(--primary-dark); }
+.rv-clear { background: transparent; color: var(--ink-faint); border-color: #D4DAE2; }
+.rv-clear:hover { color: var(--error); border-color: var(--error); }
 
 /* ---------- Milestone celebrations ---------- */
 .celebrate-toast {
