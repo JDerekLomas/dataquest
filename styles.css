@@ -27,6 +27,50 @@
 
 html { scroll-behavior: smooth; }
 
+/* ---------- Intro / start screen ---------- */
+.intro-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+  background:
+    radial-gradient(120% 90% at 70% 10%, rgba(27,95,170,0.28), transparent 60%),
+    linear-gradient(160deg, #0B2238 0%, #133A5E 55%, #0F406C 100%);
+  color: #F4F7FB;
+  opacity: 1;
+  transition: opacity 0.5s ease;
+}
+.intro-screen.is-leaving { opacity: 0; pointer-events: none; }
+.intro-screen[hidden] { display: none; }
+.intro-inner { max-width: 640px; text-align: center; }
+.intro-kicker {
+  font-size: 13px; font-weight: 600; letter-spacing: 0.08em;
+  text-transform: uppercase; color: #8FC0F0; margin-bottom: 14px;
+}
+.intro-title {
+  font-size: 56px; line-height: 1.05; margin: 0 0 20px;
+  color: #FFFFFF; letter-spacing: -0.01em;
+}
+.intro-lede { font-size: 19px; line-height: 1.5; color: #DCE6F2; margin: 0 auto 16px; max-width: 560px; }
+.intro-meta { font-size: 14px; color: #9DB4CC; margin: 0 auto 32px; max-width: 520px; }
+.intro-meta strong { color: #CFE0F2; }
+.intro-actions { display: flex; flex-direction: column; align-items: center; gap: 16px; }
+.intro-begin {
+  font-size: 18px; font-weight: 600; color: #0B2238;
+  background: #F5B57E; border: none; border-radius: 999px;
+  padding: 15px 38px; cursor: pointer;
+  box-shadow: 0 6px 24px rgba(245,181,126,0.35);
+  transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.12s ease;
+}
+.intro-begin:hover { background: #FFC796; transform: translateY(-1px); box-shadow: 0 8px 30px rgba(245,181,126,0.45); }
+.intro-begin:active { transform: translateY(0); }
+.intro-sound { font-size: 13px; color: #9DB4CC; display: inline-flex; align-items: center; gap: 7px; cursor: pointer; }
+.intro-sound input { accent-color: #F5B57E; }
+@media (max-width: 560px) { .intro-title { font-size: 40px; } .intro-lede { font-size: 17px; } }
+
 body {
   margin: 0;
   background: var(--surface);

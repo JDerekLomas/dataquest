@@ -1902,6 +1902,8 @@
   }
 
   document.addEventListener('pointerdown', function unlockAudio() {
+    var intro = document.getElementById('intro-screen');
+    if (intro && !intro.hidden) return;   // wait for the deliberate "Begin" click
     audioUnlocked = true;
     document.removeEventListener('pointerdown', unlockAudio);
     playStep(currentStep);
@@ -1932,6 +1934,26 @@
     else playStep(currentStep);
   });
   syncSoundBtn();
+
+  /* ---------- intro / start screen ---------- */
+  var introScreen = document.getElementById('intro-screen');
+  var introBegin = document.getElementById('intro-begin');
+  var introMute = document.getElementById('intro-mute');
+  if (introScreen && introBegin) {
+    document.body.style.overflow = 'hidden';     // lock scroll behind the overlay
+    if (introMute) introMute.checked = !!state.muted;
+    introBegin.addEventListener('click', function () {
+      if (introMute && introMute.checked) { state.muted = true; saveState(); syncSoundBtn(); }
+      audioUnlocked = true;                       // this click is the user gesture that unlocks audio
+      introScreen.classList.add('is-leaving');
+      document.body.style.overflow = '';
+      setTimeout(function () { introScreen.hidden = true; }, 500);
+      var s1 = document.getElementById('step-1');
+      if (s1) s1.scrollIntoView({ behavior: 'smooth' });
+      currentStep = 1;
+      playStep(1);
+    });
+  }
 
   /* ---------- restore persisted progress ---------- */
   var notesEl = document.getElementById('notes-text');
