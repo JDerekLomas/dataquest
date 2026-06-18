@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Breathing Planet — Savvas Data Show</title>
+<link rel="stylesheet" href="styles.css?v=1">
+</head>
+<body>
+
+<div class="intro-screen" id="intro-screen">
+  <div class="intro-inner">
+    <p class="intro-kicker">Savvas Data Show · Data literacy · Grades 9–11</p>
+    <h1 class="intro-title">The Breathing Planet</h1>
+    <p class="intro-lede">In 1958, a scientist began measuring the air on a Hawaiian volcano. He kept at it
+    for decades, and the chart he built became one of the most important graphs in science. You'll start
+    from his very first reading and follow the data forward through time — learning to read a trend, a cycle,
+    and an acceleration hidden in a single rising line.</p>
+    <p class="intro-meta">9 steps · about 15 minutes · narrated. Every point is a <strong>real</strong>
+    monthly measurement from NOAA's Mauna Loa observatory — 1958 to today.</p>
+    <div class="intro-actions">
+      <button class="intro-begin" id="intro-begin">Begin reading the curve ▶</button>
+      <label class="intro-sound"><input type="checkbox" id="intro-mute"> Start muted (no narration)</label>
+    </div>
+  </div>
+</div>
+
+<nav class="topnav">
+  <div class="nav-left">
+    <span class="brand">Savvas <strong>Data Show</strong></span>
+    <span class="crumb">The Breathing Planet · Mauna Loa, 1958–today</span>
+  </div>
+  <div class="nav-progress" aria-label="Lesson progress">
+    <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
+    <span class="progress-label" id="progress-label">0 / 9 checks</span>
+  </div>
+  <div class="nav-right">
+    <button class="nav-btn" id="nav-sound">Sound: on</button>
+    <button class="nav-btn" id="nav-notes">Notes</button>
+    <button class="nav-btn" id="nav-data">Data</button>
+    <button class="nav-btn" id="nav-explore">Explore</button>
+  </div>
+</nav>
+
+<div class="notes-panel" id="notes-panel" hidden>
+  <div class="notes-head"><span>My notes</span><button class="panel-close" id="notes-close">×</button></div>
+  <textarea id="notes-text" placeholder="Jot observations here. Notes stay on this page only."></textarea>
+</div>
+
+<div class="data-modal" id="data-modal" hidden>
+  <div class="data-modal-inner">
+    <div class="notes-head"><span>The dataset</span><button class="panel-close" id="data-close">×</button></div>
+    <p class="data-note">Real records from <strong>NOAA's Global Monitoring Laboratory</strong>: the monthly
+    mean CO₂ concentration measured at the Mauna Loa Observatory, Hawaii — the "Keeling Curve," running
+    continuously since March 1958.</p>
+    <div class="data-table-wrap"><table id="data-table"></table></div>
+  </div>
+</div>
+
+<header class="lesson-header">
+  <p class="kicker">Data literacy · Grades 9–11</p>
+  <h1>The Breathing Planet</h1>
+  <p class="lede">Some data only makes sense when you watch it <strong>over time</strong>. In 1958 Charles
+  David Keeling started measuring the amount of carbon dioxide in the air at a remote observatory on Mauna
+  Loa. Month after month, year after year, the readings piled up into a line with a story. In this lesson
+  you'll read that line the way a scientist does — separating the trend from the cycle from the noise.</p>
+</header>
+
+<main id="lesson">
+
+  <!-- ============ STEP 1 ============ -->
+  <section class="step" id="step-1" data-step="1">
+    <div class="step-inner">
+      <div class="viz-col">
+        <div class="viz-frame">
+          <div class="viz-container" id="viz-1" aria-label="A single CO2 measurement plotted in time"></div>
+          <div class="viz-controls">
+            <button class="util-btn" data-util="zoom-in" title="Zoom in">+</button>
+            <button class="util-btn" data-util="zoom-out" title="Zoom out">−</button>
+            <button class="util-btn" data-util="reset" title="Reset view">⟲</button>
+          </div>
+        </div>
+        <div class="instruction-bar" id="inst-1">Find the labeled point. That is the first reading — March 1958, 315.7 ppm.</div>
+      </div>
+      <div class="card-col">
+        <article class="story-card">
+          <div class="step-label">Step 1 of 9</div>
+          <h2>One reading on a volcano</h2>
+          <p>In March 1958, Charles David Keeling recorded the carbon dioxide in the air atop Mauna Loa,
+          Hawaii: <strong>315.7 parts per million</strong>. He chose the spot because its air is far from
+          cities and forests — clean enough to measure the whole planet's breath.</p>
+          <p>On a chart, it's one point at one moment in time. What makes a single reading worth investigating?</p>
+          <div class="chip-bar">
+            <span class="chip-bar-label">Explore ▸</span>
+            <button class="chip" data-chip="value">The value</button>
+            <button class="chip" data-chip="when">When</button>
+            <button class="chip" data-chip="place">The place</button>
+            <button class="chip" data-chip="source">Data source</button>
+          </div>
+          <div class="mcq" id="mcq-1">
+            <p class="mcq-q">Which clue makes this single reading worth a closer look?</p>
+            <label class="mcq-choice"><input type="radio" name="mcq1" value="A"><span>It's a precise number, in known units (ppm)</span></label>
+            <label class="mcq-choice"><input type="radio" name="mcq1" value="B"><span>It was measured at a clean, remote site</span></label>
+            <label class="mcq-choice"><input type="radio" name="mcq1" value="C"><span>Thousands more readings would follow it</span></label>
+            <label class="mcq-choice"><input type="radio" name="mcq1" value="D"><span>All of these together</span></label>
+            <button class="check-btn" data-check="1">Check my answer</button>
+            <div class="mcq-feedback" hidden></div>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ STEP 2 ============ -->
+  <section class="step" id="step-2" data-step="2">
+    <div class="step-inner">
+      <div class="viz-col">
+        <div class="viz-frame">
+          <div class="viz-container" id="viz-2" aria-label="The CO2 record drawing across time"></div>
+          <div class="viz-controls">
+            <button class="util-btn" data-util="zoom-in" title="Zoom in">+</button>
+            <button class="util-btn" data-util="zoom-out" title="Zoom out">−</button>
+            <button class="util-btn" data-util="reset" title="Reset view">⟲</button>
+          </div>
+        </div>
+        <div class="instruction-bar" id="inst-2">Watch one reading become 68 years of data. Pan and zoom freely.</div>
+      </div>
+      <div class="card-col">
+        <article class="story-card">
+          <div class="step-label">Step 2 of 9</div>
+          <h2>One reading becomes a record</h2>
+          <p>A single measurement can't tell you whether the air is changing. To see change, you need the same
+          measurement repeated — again and again, in order, over time.</p>
+          <p>Here is Keeling's first reading, joined by every monthly measurement since: <strong>819 real
+          data points</strong>, marching left to right from 1958 to this year.</p>
+          <div class="chip-bar">
+            <span class="chip-bar-label">Explore ▸</span>
+            <button class="chip" data-chip="time">Time axis</button>
+            <button class="chip" data-chip="count">Count</button>
+            <button class="chip" data-chip="latest">Latest</button>
+            <button class="chip" data-chip="source">Data source</button>
+          </div>
+          <div class="mcq" id="mcq-2">
+            <p class="mcq-q">What becomes possible when one reading becomes a time series?</p>
+            <label class="mcq-choice"><input type="radio" name="mcq2" value="A"><span>The chart gets too busy to read</span></label>
+            <label class="mcq-choice"><input type="radio" name="mcq2" value="B"><span>You can see how the value changes over time</span></label>
+            <label class="mcq-choice"><input type="radio" name="mcq2" value="C"><span>Each reading becomes less accurate</span></label>
+            <label class="mcq-choice"><input type="radio" name="mcq2" value="D"><span>Nothing — one reading tells us just as much</span></label>
+            <button class="check-btn" data-check="2">Check my answer</button>
+            <div class="mcq-feedback" hidden></div>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ STEP 3 ============ -->
+  <section class="step" id="step-3" data-step="3">
+    <div class="step-inner">
+      <div class="viz-col">
+        <div class="viz-frame">
+          <div class="viz-container" id="viz-3" aria-label="The full Keeling Curve"></div>
+          <div class="viz-controls">
+            <button class="util-btn" data-util="zoom-in" title="Zoom in">+</button>
+            <button class="util-btn" data-util="zoom-out" title="Zoom out">−</button>
+            <button class="util-btn" data-util="reset" title="Reset view">⟲</button>
+            <button class="util-btn util-layer" data-util="shuffle" title="Compare: scramble the readings out of time order">⤨ Shuffle time</button>
+          </div>
+        </div>
+        <div class="instruction-bar" id="inst-3">Does the line wander randomly — or go somewhere?</div>
+      </div>
+      <div class="card-col">
+        <article class="story-card">
+          <div class="step-label">Step 3 of 9</div>
+          <h2>The reveal</h2>
+          <p>Here is the whole record. If the air's CO₂ just jittered up and down by chance, the line would
+          wander sideways and go nowhere.</p>
+          <p>It doesn't. It <strong>climbs</strong> — relentlessly — from about 316 to over 430 ppm, while a
+          small <strong>yearly wiggle</strong> rides on top. Press <strong>Shuffle time</strong> to scramble
+          the readings out of order: the climb vanishes into noise. Order in time is the whole story.</p>
+          <div class="chip-bar">
+            <span class="chip-bar-label">Explore ▸</span>
+            <button class="chip" data-chip="rise">The rise</button>
+            <button class="chip" data-chip="compare">Compare</button>
+            <button class="chip" data-chip="wiggle">The wiggle</button>
+            <button class="chip" data-chip="count">Count</button>
+          </div>
+          <div class="mcq" id="mcq-3">
+            <p class="mcq-q">What does the shape of the line reveal?</p>
+            <label class="mcq-choice"><input type="radio" name="mcq3" value="A"><span>CO₂ jitters randomly with no overall direction</span></label>
+            <label class="mcq-choice"><input type="radio" name="mcq3" value="B"><span>A steady climb over time, with a small yearly wiggle on top</span></label>
+            <label class="mcq-choice"><input type="radio" name="mcq3" value="C"><span>CO₂ has stayed flat since 1958</span></label>
+            <label class="mcq-choice"><input type="radio" name="mcq3" value="D"><span>CO₂ rises and falls in equal amounts, ending where it began</span></label>
+            <button class="check-btn" data-check="3">Check my answer</button>
+            <div class="mcq-feedback" hidden></div>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ STEP 4 ============ -->
+  <section class="step" id="step-4" data-step="4">
+    <div class="step-inner">
+      <div class="viz-col">
+        <div class="viz-frame">
+          <div class="viz-container" id="viz-4" aria-label="One monthly reading's record opened"></div>
+          <div class="viz-controls">
+            <button class="util-btn" data-util="zoom-in" title="Zoom in">+</button>
+            <button class="util-btn" data-util="zoom-out" title="Zoom out">−</button>
+            <button class="util-btn" data-util="reset" title="Reset view">⟲</button>
+          </div>
+        </div>
+        <div class="instruction-bar" id="inst-4">Every point is a month of measurements. Click one to read its fields.</div>
+      </div>
+      <div class="card-col">
+        <article class="story-card">
+          <div class="step-label">Step 4 of 9</div>
+          <div class="expert-tag"><span class="expert-avatar">RK</span><span><strong>Dr. Ralph Keeling</strong><br>Scripps CO₂ Program</span></div>
+          <h2>What a reading knows</h2>
+          <p>"My father started this record, and I keep it going. Each point is not a guess — it's a
+          <strong>monthly mean</strong> built from many daily measurements, each with a
+          <strong>date</strong>, a <strong>value in ppm</strong>, the <strong>number of days</strong> behind
+          it, and an <strong>uncertainty</strong>. The line is only as trustworthy as those fields."</p>
+          <p class="fine-print">Every value is a real NOAA Mauna Loa record. Early months with too few days are
+          marked, not invented.</p>
+          <div class="chip-bar">
+            <span class="chip-bar-label">Explore ▸</span>
+            <button class="chip" data-chip="value">CO₂ value</button>
+            <button class="chip" data-chip="days">Days behind it</button>
+            <button class="chip" data-chip="uncert">Uncertainty</button>
+            <button class="chip" data-chip="source">Data source</button>
+          </div>
+          <div class="mcq" id="mcq-4">
+            <p class="mcq-q">In this dataset, each monthly point carries…</p>
+            <label class="mcq-choice"><input type="radio" name="mcq4" value="A"><span>Only a CO₂ number</span></label>
+            <label class="mcq-choice"><input type="radio" name="mcq4" value="B"><span>A date, a CO₂ value, and measures of how solid that value is</span></label>
+            <label class="mcq-choice"><input type="radio" name="mcq4" value="C"><span>Only the year</span></label>
+            <label class="mcq-choice"><input type="radio" name="mcq4" value="D"><span>The local weather forecast</span></label>
+            <button class="check-btn" data-check="4">Check my answer</button>
+            <div class="mcq-feedback" hidden></div>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ STEP 5 ============ -->
+  <section class="step" id="step-5" data-step="5">
+    <div class="step-inner">
+      <div class="viz-col">
+        <div class="viz-frame">
+          <div class="viz-container" id="viz-5" aria-label="The Keeling Curve for free exploration"></div>
+          <div class="viz-controls">
+            <button class="util-btn" data-util="zoom-in" title="Zoom in">+</button>
+            <button class="util-btn" data-util="zoom-out" title="Zoom out">−</button>
+            <button class="util-btn" data-util="reset" title="Reset view">⟲</button>
+          </div>
+        </div>
+        <div class="instruction-bar" id="inst-5">Pan, zoom, hover. Explore freely — there is no wrong observation here.</div>
+      </div>
+      <div class="card-col">
+        <article class="story-card">
+          <div class="step-label">Step 5 of 9</div>
+          <h2>Notice &amp; wonder</h2>
+          <p>Scientists start with open eyes, not answers. Drag and zoom the chart. Hover points to read their
+          values. Zoom into a few years to see the line up close. Then tag every shape you can honestly say
+          you see — several answers can be true at once.</p>
+          <div class="chip-bar">
+            <span class="chip-bar-label">Explore ▸</span>
+            <button class="chip" data-chip="rise">The rise</button>
+            <button class="chip" data-chip="wiggle">The wiggle</button>
+            <button class="chip" data-chip="compare">Compare decades</button>
+            <button class="chip" data-chip="count">Count</button>
+          </div>
+          <div class="mcq mcq-multi" id="mcq-5">
+            <p class="mcq-q">Which shapes do you see in the line? Tag all that apply.</p>
+            <div class="tag-grid">
+              <label class="mcq-choice tag"><input type="checkbox" name="mcq5" value="rising trend"><span>Rising trend</span></label>
+              <label class="mcq-choice tag"><input type="checkbox" name="mcq5" value="seasonal cycle"><span>Yearly cycle</span></label>
+              <label class="mcq-choice tag"><input type="checkbox" name="mcq5" value="getting steeper"><span>Getting steeper</span></label>
+              <label class="mcq-choice tag"><input type="checkbox" name="mcq5" value="sawtooth"><span>Sawtooth</span></label>
+              <label class="mcq-choice tag"><input type="checkbox" name="mcq5" value="noise"><span>Month-to-month noise</span></label>
+              <label class="mcq-choice tag"><input type="checkbox" name="mcq5" value="flat"><span>Flat</span></label>
+            </div>
+            <button class="check-btn" data-check="5">Save my observations</button>
+            <div class="mcq-feedback" hidden></div>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ STEP 6 ============ -->
+  <section class="step" id="step-6" data-step="6">
+    <div class="step-inner">
+      <div class="viz-col">
+        <div class="viz-frame">
+          <div class="viz-container" id="viz-6" aria-label="The curve split into trend and seasonal cycle"></div>
+          <div class="viz-controls">
+            <button class="util-btn" data-util="zoom-in" title="Zoom in">+</button>
+            <button class="util-btn" data-util="zoom-out" title="Zoom out">−</button>
+            <button class="util-btn" data-util="reset" title="Reset view">⟲</button>
+            <button class="util-btn util-layer" data-util="decompose" title="Split the line into trend + seasonal cycle">⊟ Split it apart</button>
+          </div>
+        </div>
+        <div class="instruction-bar" id="inst-6">Split the line into its two hidden signals, then zoom into one year.</div>
+      </div>
+      <div class="card-col">
+        <article class="story-card">
+          <div class="step-label">Step 6 of 9</div>
+          <h2>Decompose: trend plus cycle</h2>
+          <p>One of the most powerful moves in time-series analysis is <strong>decomposition</strong> —
+          splitting a messy line into simpler signals. This curve is really two things added together: a
+          smooth <strong>long-term trend</strong>, and a repeating <strong>seasonal cycle</strong>.</p>
+          <p>The cycle is the planet breathing: as Northern-Hemisphere forests leaf out each spring and summer,
+          they pull CO₂ from the air (a dip), then release it in fall and winter (a rise) — about
+          <strong>7 ppm up and down every year</strong>.</p>
+          <div class="chip-bar">
+            <span class="chip-bar-label">Explore ▸</span>
+            <button class="chip" data-chip="decompose">Split it</button>
+            <button class="chip" data-chip="trend">Trend only</button>
+            <button class="chip" data-chip="oneyear">One year</button>
+            <button class="chip" data-chip="amplitude">Amplitude</button>
+          </div>
+          <div class="mcq" id="mcq-6">
+            <p class="mcq-q"><span class="evidence-flag">Visual evidence check</span> Split the line apart, then answer: the Keeling Curve is the sum of which two patterns?</p>
+            <label class="mcq-choice"><input type="radio" name="mcq6" value="A"><span>Two random jitters with no structure</span></label>
+            <label class="mcq-choice"><input type="radio" name="mcq6" value="B"><span>A long-term rising trend plus a repeating yearly seasonal cycle</span></label>
+            <label class="mcq-choice"><input type="radio" name="mcq6" value="C"><span>A falling trend plus a flat line</span></label>
+            <label class="mcq-choice"><input type="radio" name="mcq6" value="D"><span>Only a seasonal cycle — there is no trend</span></label>
+            <button class="check-btn" data-check="6">Check evidence</button>
+            <div class="mcq-feedback" hidden></div>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ STEP 7 ============ -->
+  <section class="step" id="step-7" data-step="7">
+    <div class="step-inner">
+      <div class="viz-col">
+        <div class="viz-frame">
+          <div class="viz-container" id="viz-7" aria-label="Bar chart of CO2 increase per decade"></div>
+        </div>
+        <div class="instruction-bar" id="inst-7">Read the bars left to right. Is each decade's rise the same — or growing?</div>
+      </div>
+      <div class="card-col">
+        <article class="story-card">
+          <div class="step-label">Step 7 of 9</div>
+          <h2>The rate lens</h2>
+          <p>Leave the raw line for a moment. For each decade, measure how fast CO₂ rose — its
+          <strong>parts per million per year</strong> — and stack those rates into a bar chart. Grouping by a
+          variable (here, the decade) is one of the most powerful moves in analysis.</p>
+          <p>The bars don't hold steady: they <strong>grow</strong>. CO₂ climbed about 0.9 ppm/year in the
+          1960s — and about 2.5 ppm/year in the 2020s. The rise itself is speeding up.</p>
+          <div class="chip-bar">
+            <span class="chip-bar-label">Explore ▸</span>
+            <button class="chip" data-chip="axes">Axes</button>
+            <button class="chip" data-chip="bars">Bars</button>
+            <button class="chip" data-chip="accel">Acceleration</button>
+            <button class="chip" data-chip="count">Numbers</button>
+          </div>
+          <div class="mcq" id="mcq-7">
+            <p class="mcq-q">What does the rate-per-decade chart show?</p>
+            <label class="mcq-choice"><input type="radio" name="mcq7" value="A"><span>CO₂ rises by the same amount each decade</span></label>
+            <label class="mcq-choice"><input type="radio" name="mcq7" value="B"><span>The yearly rise is getting bigger decade by decade — it's accelerating</span></label>
+            <label class="mcq-choice"><input type="radio" name="mcq7" value="C"><span>The rise is slowing down over time</span></label>
+            <label class="mcq-choice"><input type="radio" name="mcq7" value="D"><span>CO₂ stopped rising after the 1980s</span></label>
+            <button class="check-btn" data-check="7">Check my answer</button>
+            <div class="mcq-feedback" hidden></div>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ STEP 8 ============ -->
+  <section class="step" id="step-8" data-step="8">
+    <div class="step-inner">
+      <div class="viz-col">
+        <div class="viz-frame">
+          <div class="viz-container" id="viz-8" aria-label="The curve with a straight-line fit"></div>
+          <div class="viz-controls">
+            <button class="util-btn" data-util="reset" title="Reset view">⟲</button>
+            <button class="util-btn util-layer" data-util="fit" title="Draw a straight-line fit through the data">╱ Straight-line fit</button>
+          </div>
+        </div>
+        <div class="instruction-bar" id="inst-8">Lay a straight ruler along the trend. Does the data stay on it — or pull away?</div>
+      </div>
+      <div class="card-col">
+        <article class="story-card">
+          <div class="step-label">Step 8 of 9</div>
+          <h2>Trend, and a warning about straight lines</h2>
+          <p>Is there a trend? Unmistakably — a strong upward one. But here's the subtle move a careful
+          analyst makes: draw a <strong>straight-line fit</strong> through the whole record and watch what it
+          gets wrong.</p>
+          <p>The straight line can't bend, so it drifts off the data — and at the recent end the real curve
+          pulls <strong>upward and away</strong> from the ruler. The true trend isn't linear; it
+          <strong>curves upward</strong>, because the rise is accelerating. Assuming "steady and straight"
+          would under-predict today's CO₂.</p>
+          <div class="chip-bar">
+            <span class="chip-bar-label">Explore ▸</span>
+            <button class="chip" data-chip="fit">Straight fit</button>
+            <button class="chip" data-chip="gap">Where it misses</button>
+            <button class="chip" data-chip="curve">The real curve</button>
+            <button class="chip" data-chip="extrapolate">Extend it</button>
+          </div>
+          <div class="mcq" id="mcq-8">
+            <p class="mcq-q">Is there a trend, and is a straight line a good fit?</p>
+            <label class="mcq-choice"><input type="radio" name="mcq8" value="A"><span>No trend at all — the data is flat</span></label>
+            <label class="mcq-choice"><input type="radio" name="mcq8" value="B"><span>A strong upward trend, but a straight line under-fits it — the curve bends upward</span></label>
+            <label class="mcq-choice"><input type="radio" name="mcq8" value="C"><span>A downward trend that a straight line fits perfectly</span></label>
+            <label class="mcq-choice"><input type="radio" name="mcq8" value="D"><span>A trend, and a straight line fits it exactly</span></label>
+            <button class="check-btn" data-check="8">Check my answer</button>
+            <div class="mcq-feedback" hidden></div>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ STEP 9 ============ -->
+  <section class="step" id="step-9" data-step="9">
+    <div class="step-inner">
+      <div class="viz-col">
+        <div class="viz-frame">
+          <div class="viz-container" id="viz-9" aria-label="The Keeling Curve with milestones marked"></div>
+          <div class="viz-controls">
+            <button class="util-btn" data-util="zoom-in" title="Zoom in">+</button>
+            <button class="util-btn" data-util="zoom-out" title="Zoom out">−</button>
+            <button class="util-btn" data-util="reset" title="Reset view">⟲</button>
+            <button class="util-btn util-layer" data-util="milestones" title="Mark when CO2 crossed 350, 400, 420 ppm">◆ Mark milestones</button>
+          </div>
+        </div>
+        <div class="instruction-bar" id="inst-9">The line has a name and a story. Make the claim, then mark the milestones.</div>
+      </div>
+      <div class="card-col">
+        <article class="story-card">
+          <div class="step-label">Step 9 of 9</div>
+          <h2>Name the finding: the Keeling Curve</h2>
+          <p>The line you read is the <strong>Keeling Curve</strong>. In this real record, CO₂ has risen about
+          <strong>117 ppm since 1958</strong> — crossing 350 in 1987, 400 in 2015, and 420 in 2023 — while
+          breathing in a steady yearly cycle and climbing ever faster. It is the clearest single picture of a
+          changing atmosphere.</p>
+          <p>Now make it yours. Write a claim that uses <strong>one shape word</strong> (trend, cycle, curve,
+          rise…) and <strong>one number or pattern observation</strong> (a count, "since 1958", "accelerating"…).</p>
+          <div class="chip-bar">
+            <span class="chip-bar-label">Explore ▸</span>
+            <button class="chip" data-chip="rise">The rise</button>
+            <button class="chip" data-chip="milestones">Milestones</button>
+            <button class="chip" data-chip="accel">Acceleration</button>
+            <button class="chip" data-chip="wiggle">The cycle</button>
+          </div>
+          <div class="mcq" id="mcq-9">
+            <p class="mcq-q"><span class="evidence-flag">Visual evidence check</span> Your claim:</p>
+            <textarea id="claim-text" rows="4" placeholder="Example shape: “The Keeling Curve shows a rising trend of about 117 ppm since 1958, with a yearly cycle on top — use the Milestones chip to cite an exact year.”"></textarea>
+            <div class="claim-hints">
+              <span class="hint-pill" data-hint="trend">trend</span>
+              <span class="hint-pill" data-hint="cycle">cycle</span>
+              <span class="hint-pill" data-hint="curve">curve</span>
+              <span class="hint-pill" data-hint="rise">rise</span>
+            </div>
+            <button class="check-btn" data-check="9">Check evidence</button>
+            <div class="mcq-feedback" hidden></div>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<section class="lesson-end" id="lesson-end">
+  <p class="end-kicker">Curve read</p>
+  <h2>You read the Keeling Curve.</h2>
+  <p>You started from one reading on a volcano and built a full evidence chain — the same moves scientists use
+  to turn a stream of numbers into an understanding of change.</p>
+  <ul class="end-recap">
+    <li>A single reading became a <strong>time series</strong> of 819 real NOAA measurements.</li>
+    <li>The line wasn't random — it showed a <strong>steady climb</strong> with a yearly wiggle on top.</li>
+    <li>Every point carries a <strong>date, a value, and a measure of how solid it is</strong>.</li>
+    <li><strong>Decomposition</strong> split the curve into a long-term trend plus a seasonal "breathing" cycle.</li>
+    <li>A rate chart showed the rise is <strong>accelerating</strong> — about 0.9 ppm/yr then, 2.5 ppm/yr now.</li>
+    <li>A straight-line fit <strong>under-predicted</strong> the present: the real trend curves upward.</li>
+    <li>The line has a name: the <strong>Keeling Curve</strong>, up ~117 ppm since 1958.</li>
+  </ul>
+  <div class="end-claim" id="end-claim" hidden>
+    <div class="end-claim-label">Your evidence-based claim</div>
+    <blockquote id="end-claim-text"></blockquote>
+  </div>
+  <div class="end-actions">
+    <button class="end-btn secondary" id="end-top">Back to the top</button>
+    <button class="end-btn" id="end-restart">Start over</button>
+  </div>
+</section>
+
+<footer class="lesson-footer">
+  <p>Savvas Data Show · classroom prototype · CO₂ data: <strong>NOAA Global Monitoring Laboratory</strong>,
+  Mauna Loa monthly mean CO₂ (the Keeling Curve), 1958–today. Part of the Data Show series ·
+  <a href="../" style="color:#1B5FAA">← Mapping the Ring of Fire</a> ·
+  <a href="../cholera/" style="color:#1B5FAA">The Broad Street Pump</a> ·
+  <a href="../exoplanets/" style="color:#1B5FAA">Are We Alone?</a>.</p>
+</footer>
+
+<div class="map-tooltip" id="map-tooltip" hidden></div>
+
+<div class="celebrate-toast" id="celebrate-toast" hidden></div>
+
+<div class="scroll-fade" id="scroll-fade" aria-hidden="true">
+  <div class="scroll-cue"><span>⌄</span>scroll</div>
+</div>
+
+<div id="audio-rack" hidden>
+  <audio id="audio-1" src="assets/audio/step1.mp3" preload="none"></audio>
+  <audio id="audio-2" src="assets/audio/step2.mp3" preload="none"></audio>
+  <audio id="audio-3" src="assets/audio/step3.mp3" preload="none"></audio>
+  <audio id="audio-4" src="assets/audio/step4.mp3" preload="none"></audio>
+  <audio id="audio-5" src="assets/audio/step5.mp3" preload="none"></audio>
+  <audio id="audio-6" src="assets/audio/step6.mp3" preload="none"></audio>
+  <audio id="audio-7" src="assets/audio/step7.mp3" preload="none"></audio>
+  <audio id="audio-8" src="assets/audio/step8.mp3" preload="none"></audio>
+  <audio id="audio-9" src="assets/audio/step9.mp3" preload="none"></audio>
+</div>
+
+<script src="d3.v7.min.js"></script>
+<script src="data/co2.js"></script>
+<script src="app.js?v=1"></script>
+</body>
+</html>
