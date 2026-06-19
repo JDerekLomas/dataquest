@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Are We Alone? — Savvas Data Show</title>
 <link rel="stylesheet" href="styles.css?v=1">
-<link rel="stylesheet" href="../shared/data-explorer.css?v=3">
+<link rel="stylesheet" href="../shared/data-explorer.css?v=4">
 </head>
 <body>
 
@@ -46,16 +46,6 @@
 <div class="notes-panel" id="notes-panel" hidden>
   <div class="notes-head"><span>My notes</span><button class="panel-close" id="notes-close">×</button></div>
   <textarea id="notes-text" placeholder="Jot observations here. Notes stay on this page only."></textarea>
-</div>
-
-<div class="data-modal" id="data-modal" hidden>
-  <div class="data-modal-inner">
-    <div class="notes-head"><span>The dataset</span><button class="panel-close" id="data-close">×</button></div>
-    <p class="data-note">Real records from <strong>NASA's Exoplanet Archive</strong> (the
-    <em>pscomppars</em> confirmed-planet table): one row per confirmed exoplanet, with radius, mass,
-    orbit, starlight, host star, and how and when it was discovered.</p>
-    <div class="data-table-wrap"><table id="data-table"></table></div>
-  </div>
 </div>
 
 <header class="lesson-header">
@@ -531,7 +521,7 @@
 
 <script src="d3.v7.min.js"></script>
 <script src="data/planets.js"></script>
-<script src="../shared/data-explorer.js?v=3"></script>
+<script src="../shared/data-explorer.js?v=4"></script>
 <script src="app.js?v=2"></script>
 </body>
 </html>

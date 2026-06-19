@@ -56,6 +56,9 @@ table.dx-table thead th:hover{background:#E9EEF3}
 table.dx-table th .dx-sort{color:#1B5FAA; font-size:10px; margin-left:3px}
 table.dx-table td.num, table.dx-table th.num{text-align:right; font-variant-numeric:tabular-nums}
 table.dx-table tbody tr:hover{background:#F8FAFB}
+/* sticky first column for wide tables / crosstabs */
+.dx-tablewrap table.dx-table tbody td:first-child{position:sticky; left:0; background:#fff; z-index:1; box-shadow:1px 0 0 #EEF1F4}
+.dx-tablewrap table.dx-table thead th:first-child{position:sticky; left:0; z-index:3; box-shadow:1px 0 0 #E3E8ED}
 .dx-coltype{font-size:10px; color:#9AA4B0; font-weight:400; text-transform:none; letter-spacing:0; display:block}
 
 /* ---- Toolbars / controls ---- */
